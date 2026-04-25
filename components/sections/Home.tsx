@@ -83,7 +83,7 @@ export default function Home({ go }: { go: (id: SectionId) => void }) {
               style={{ background: '#fff', borderRadius: 22, boxShadow: '0 2px 16px rgba(0,0,0,0.05)', overflow: 'hidden', padding: e.type === 'photo' ? 0 : 20 }}
             >
               {e.type === 'photo' && (
-                <img src={e.src} alt={e.label} style={{ width: '100%', height: 178, objectFit: 'cover', display: 'block' }} />
+                <img src={e.src} alt={e.label} style={{ width: '100%', height: 'auto', display: 'block' }} />
               )}
               {e.type === 'quote' && (
                 <>

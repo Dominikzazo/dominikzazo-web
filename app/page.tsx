@@ -61,9 +61,9 @@ export default function HomePage() {
           <Section go={go} />
         </main>
         <Footer />
-        {/* Scroll spacer to reveal bottom panel */}
-        <div className="h-screen" />
       </div>
+      {/* Scroll spacer outside the bg div so fixed panel shows through */}
+      <div className="relative z-[1] h-screen" />
     </>
   )
 }
