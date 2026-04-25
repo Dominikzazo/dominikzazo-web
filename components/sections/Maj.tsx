@@ -11,7 +11,7 @@ const INTENTIONS = [
 
 export default function Maj({ go: _ }: { go: (id: SectionId) => void }) {
   return (
-    <div className="page-enter" style={{ maxWidth: 680, margin: '0 auto', padding: '120px 32px 80px' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 680, margin: '0 auto' }}>
       <div style={{ fontSize: 13, color: '#aaa', letterSpacing: '0.06em', marginBottom: 16, fontFamily: 'var(--font-inter), sans-serif' }}>
         apríl → máj 2025
       </div>

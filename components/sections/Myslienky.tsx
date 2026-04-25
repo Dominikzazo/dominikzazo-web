@@ -97,7 +97,7 @@ export default function Myslienky({ go: _ }: { go: (id: SectionId) => void }) {
   const all = [...LOCAL_THOUGHTS, ...posts.map(p => ({ ...p, isSubstack: true }))]
 
   return (
-    <div className="page-enter" style={{ maxWidth: 760, margin: '0 auto', padding: '120px 32px 80px' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 760, margin: '0 auto' }}>
       <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
         myšlienky.
       </h2>

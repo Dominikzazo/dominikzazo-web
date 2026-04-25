@@ -16,7 +16,7 @@ const btnBase: React.CSSProperties = {
 
 export default function Projekty({ go: _ }: { go: (id: SectionId) => void }) {
   return (
-    <div className="page-enter" style={{ maxWidth: 760, margin: '0 auto', padding: '120px 32px 80px' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 760, margin: '0 auto' }}>
       <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
         projekty. 🟠
       </h2>
@@ -25,7 +25,7 @@ export default function Projekty({ go: _ }: { go: (id: SectionId) => void }) {
       </p>
 
       {/* Bitcoin dark card */}
-      <div style={{ background: '#111', borderRadius: 24, padding: 40, marginBottom: 14, position: 'relative', overflow: 'hidden' }}>
+      <div className="bitcoin-card" style={{ background: '#111', borderRadius: 24, padding: 'clamp(20px, 5vw, 40px)', marginBottom: 14, position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: -70, right: -70, width: 220, height: 220, background: '#f7931a', borderRadius: '50%', filter: 'blur(90px)', opacity: 0.28, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: -20, left: -10, fontSize: 120, opacity: 0.06, lineHeight: 1, userSelect: 'none', pointerEvents: 'none', color: '#f7931a' }}>₿</div>
         <div style={{ fontSize: 11, color: '#f7931a', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14, fontWeight: 600 }}>

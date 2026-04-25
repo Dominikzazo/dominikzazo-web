@@ -27,8 +27,8 @@ export default function Home({ go }: { go: (id: SectionId) => void }) {
   }, [])
 
   return (
-    <div className="page-enter" style={{ maxWidth: 1060, margin: '0 auto', padding: '120px 32px 80px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 1060, margin: '0 auto' }}>
+      <div className="home-split">
 
         {/* Left: intro */}
         <div>
@@ -75,7 +75,7 @@ export default function Home({ go }: { go: (id: SectionId) => void }) {
         </div>
 
         {/* Right: bento grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div className="bento-grid">
           {BENTO.map((e, i) => (
             <div
               key={i}

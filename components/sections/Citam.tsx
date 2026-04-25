@@ -28,7 +28,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 export default function Citam({ go: _ }: { go: (id: SectionId) => void }) {
   return (
-    <div className="page-enter" style={{ maxWidth: 900, margin: '0 auto', padding: '120px 32px 80px' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 900, margin: '0 auto' }}>
       <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
         čítam.
       </h2>

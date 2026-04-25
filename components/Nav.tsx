@@ -29,18 +29,21 @@ export default function Nav({ active, go }: NavProps) {
 
   return (
     <nav
-      className="fixed top-5 left-1/2 -translate-x-1/2 z-[200] flex flex-wrap gap-0.5 justify-center rounded-full border border-black/[0.07] py-[5px] px-[6px] shadow-[0_4px_24px_rgba(0,0,0,0.08)] transition-[background] duration-300"
+      className="nav-scroll fixed top-3 left-1/2 -translate-x-1/2 z-[200] flex gap-0.5 rounded-full border border-black/[0.07] py-[5px] px-[6px] shadow-[0_4px_24px_rgba(0,0,0,0.08)] transition-[background] duration-300"
       style={{
         background: scrolled ? 'rgba(250,250,248,0.92)' : 'rgba(250,250,248,0.7)',
         backdropFilter: 'blur(14px)',
-        maxWidth: 'calc(100vw - 32px)',
+        maxWidth: 'calc(100vw - 24px)',
+        overflowX: 'auto',
+        flexWrap: 'nowrap',
+        flexShrink: 0,
       }}
     >
       {NAV_ITEMS.map(item => (
         <button
           key={item.id}
           onClick={() => go(item.id)}
-          className="rounded-full px-[15px] py-[6px] text-[13px] transition-all duration-200 tracking-[0.01em]"
+          className="rounded-full px-[13px] py-[6px] text-[12px] sm:px-[15px] sm:text-[13px] transition-all duration-200 tracking-[0.01em] whitespace-nowrap"
           style={{
             border: 'none',
             fontFamily: 'var(--font-inter), sans-serif',
@@ -56,7 +59,7 @@ export default function Nav({ active, go }: NavProps) {
       <Link
         href="/slow-life"
         target="_blank"
-        className="rounded-full px-[15px] py-[6px] text-[13px] tracking-[0.01em] transition-all duration-200 no-underline"
+        className="rounded-full px-[13px] py-[6px] text-[12px] sm:px-[15px] sm:text-[13px] tracking-[0.01em] transition-all duration-200 no-underline whitespace-nowrap"
         style={{
           border: '1.5px solid #e0dcd6',
           fontFamily: 'var(--font-inter), sans-serif',

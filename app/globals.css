@@ -61,6 +61,46 @@
 .animate-celebrate  { animation: celebrate 0.5s ease; }
 .animate-float-slow { animation: floatSlow 2s ease-in-out infinite; }
 
+/* ── Mobile nav scrollbar hide ── */
+.nav-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+.nav-scroll::-webkit-scrollbar { display: none; }
+
+/* ── Responsive section padding ── */
+.page-pad { padding: 96px 16px 56px; }
+@media (min-width: 640px)  { .page-pad { padding: 110px 24px 72px; } }
+@media (min-width: 1024px) { .page-pad { padding: 120px 32px 80px; } }
+
+/* ── Home two-col grid ── */
+.home-split { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: start; }
+@media (min-width: 1024px) { .home-split { grid-template-columns: 1fr 1fr; gap: 64px; } }
+
+/* ── OMne hero row ── */
+.omne-hero { display: grid; grid-template-columns: 1fr; gap: 32px; align-items: start; margin-bottom: 40px; }
+@media (min-width: 640px) { .omne-hero { grid-template-columns: 1fr 200px; gap: 48px; margin-bottom: 48px; } }
+
+/* ── OMne fun facts ── */
+.facts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 40px; }
+@media (min-width: 640px) { .facts-grid { grid-template-columns: repeat(3, 1fr); margin-bottom: 48px; } }
+
+/* ── OMne photo gallery ── */
+.photo-gallery { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 40px; }
+@media (min-width: 500px) { .photo-gallery { grid-template-columns: repeat(3, 1fr); margin-bottom: 48px; align-items: end; } }
+
+/* ── Dva módy ── */
+.dva-mody { display: grid; grid-template-columns: 1fr; gap: 32px; }
+@media (min-width: 640px) { .dva-mody { grid-template-columns: 1fr 1fr; } }
+
+/* ── Nav cards (Apple style) ── */
+.nav-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+/* ── Map overflow on mobile ── */
+.map-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.map-scroll svg { min-width: 560px; }
+
+/* ── Bento grid ── */
+.bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (min-width: 1024px) { .bento-grid { gap: 14px; } }
+
 .map-pill-label {
   font-family: var(--font-inter), sans-serif;
   font-size: 10.5px;

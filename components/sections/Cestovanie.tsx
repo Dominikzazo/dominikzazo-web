@@ -27,7 +27,7 @@ export default function Cestovanie({ go: _ }: { go: (id: SectionId) => void }) {
   const filtered = filter === 'all' ? ALL_PLACES : ALL_PLACES.filter(p => p.status === filter)
 
   return (
-    <div className="page-enter" style={{ maxWidth: 1000, margin: '0 auto', padding: '120px 32px 80px' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 1000, margin: '0 auto' }}>
       <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
         cestovanie.
       </h2>
@@ -35,7 +35,9 @@ export default function Cestovanie({ go: _ }: { go: (id: SectionId) => void }) {
         Plánované aj random. Rýchlikom, vždy rýchlikom. 🚄
       </p>
 
-      <HandwrittenMap onHover={setHov} />
+      <div className="map-scroll">
+        <HandwrittenMap onHover={setHov} />
+      </div>
 
       {hov && (
         <div

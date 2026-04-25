@@ -52,10 +52,10 @@ function NavCard({ card, go }: { card: typeof NAV_CARDS[0]; go: (id: SectionId) 
 
 export default function OMne({ go }: { go: (id: SectionId) => void }) {
   return (
-    <div className="page-enter" style={{ maxWidth: 740, margin: '0 auto', padding: '120px 32px 80px' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 740, margin: '0 auto' }}>
 
       {/* Hero row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: 48, alignItems: 'start', marginBottom: 48 }}>
+      <div className="omne-hero">
         <div>
           <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
             o mne.
@@ -81,7 +81,7 @@ export default function OMne({ go }: { go: (id: SectionId) => void }) {
       </div>
 
       {/* Fun facts grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 48 }}>
+      <div className="facts-grid">
         {FUN_FACTS.map((f, i) => (
           <div key={i} style={{ background: '#f7f7f5', borderRadius: 16, padding: '14px 16px' }}>
             <div style={{ fontSize: 20, marginBottom: 7 }}>{f.e}</div>
@@ -92,7 +92,7 @@ export default function OMne({ go }: { go: (id: SectionId) => void }) {
       </div>
 
       {/* Photo gallery */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 48, alignItems: 'end' }}>
+      <div className="photo-gallery">
         <img src="/uploads/IMG_3451.JPG" alt="túra" style={{ width: '100%', height: 200, objectFit: 'cover', objectPosition: 'center top', borderRadius: 16, display: 'block', transform: 'rotate(-2.5deg)', boxShadow: '0 6px 24px rgba(0,0,0,0.10)' }} />
         <img src="/uploads/IMG_0932.JPG" alt="Rím" style={{ width: '100%', height: 220, objectFit: 'cover', objectPosition: 'center top', borderRadius: 16, display: 'block', transform: 'rotate(1deg) translateY(-10px)', boxShadow: '0 6px 24px rgba(0,0,0,0.10)' }} />
         <img src="/uploads/IMG_2923.JPG" alt="výlet" style={{ width: '100%', height: 190, objectFit: 'cover', objectPosition: 'center 30%', borderRadius: 16, display: 'block', transform: 'rotate(2deg)', boxShadow: '0 6px 24px rgba(0,0,0,0.10)' }} />
@@ -101,7 +101,7 @@ export default function OMne({ go }: { go: (id: SectionId) => void }) {
       {/* Two modes */}
       <div style={{ marginBottom: 48 }}>
         <h3 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 24, fontWeight: 500, color: '#1a1a1a', marginBottom: 28 }}>dva módy. 😅</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
+        <div className="dva-mody">
           {/* Unconscious */}
           <div>
             <p style={{ fontFamily: 'var(--font-caveat), cursive', fontSize: 21, color: '#1a1a1a', lineHeight: 1.4, marginBottom: 14 }}>
@@ -141,7 +141,7 @@ export default function OMne({ go }: { go: (id: SectionId) => void }) {
         <h3 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 18, fontWeight: 500, color: '#aaa', marginBottom: 20, letterSpacing: '0.02em' }}>
           kde ma nájdeš.
         </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+        <div className="nav-cards-grid">
           {NAV_CARDS.map(card => <NavCard key={card.target} card={card} go={go} />)}
         </div>
       </div>
