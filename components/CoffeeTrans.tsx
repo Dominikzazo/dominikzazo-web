@@ -37,7 +37,7 @@ export default function CoffeeTrans({ onDone }: { onDone: () => void }) {
       className="fixed inset-0 z-[999] flex flex-col items-center justify-center page-enter"
       style={{ background: '#fafaf8', padding: '0 32px' }}
     >
-      <svg width="72" height="88" viewBox="0 0 72 88" style={{ marginBottom: 32 }}>
+      <svg width="88" height="96" viewBox="-4 -12 92 104" style={{ marginBottom: 32 }}>
         {[22, 36, 50].map((x, i) => (
           <path
             key={x}

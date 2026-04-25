@@ -43,7 +43,7 @@ export default function Nav({ active, go }: NavProps) {
         <button
           key={item.id}
           onClick={() => go(item.id)}
-          className="rounded-full px-[13px] py-[6px] text-[12px] sm:px-[15px] sm:text-[13px] transition-all duration-200 tracking-[0.01em] whitespace-nowrap"
+          className="rounded-full px-[8px] py-[3px] text-[10.5px] sm:px-[13px] sm:py-[6px] sm:text-[12px] transition-all duration-200 tracking-[0.01em] whitespace-nowrap"
           style={{
             border: 'none',
             fontFamily: 'var(--font-inter), sans-serif',
@@ -59,7 +59,7 @@ export default function Nav({ active, go }: NavProps) {
       <Link
         href="/slow-life"
         target="_blank"
-        className="rounded-full px-[13px] py-[6px] text-[12px] sm:px-[15px] sm:text-[13px] tracking-[0.01em] transition-all duration-200 no-underline whitespace-nowrap"
+        className="rounded-full px-[8px] py-[3px] text-[10.5px] sm:px-[13px] sm:py-[6px] sm:text-[12px] tracking-[0.01em] transition-all duration-200 no-underline whitespace-nowrap"
         style={{
           border: '1.5px solid #e0dcd6',
           fontFamily: 'var(--font-inter), sans-serif',
@@ -77,7 +77,8 @@ export default function Nav({ active, go }: NavProps) {
           e.currentTarget.style.borderColor = '#e0dcd6'
         }}
       >
-        ☕ pomalé ráno ↗
+        <span className="sm:hidden">☕ ráno</span>
+        <span className="hidden sm:inline">☕ pomalé ráno ↗</span>
       </Link>
     </nav>
   )
