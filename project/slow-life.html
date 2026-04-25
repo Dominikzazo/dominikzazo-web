@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pomalé ráno · Dominik Žažo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #fdf9f0;
+      color: #1a1a1a;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    ::selection { background: #d4e8c8; }
+
+    @keyframes checkDraw {
+      from { stroke-dashoffset: 30; }
+      to   { stroke-dashoffset: 0; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes celebrate {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.06); }
+      60%  { transform: scale(0.97); }
+      100% { transform: scale(1); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-5px); }
+    }
+    @keyframes strikeThrough {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+
+    .section-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.04);
+      padding: 32px 36px;
+      animation: fadeIn 0.4s ease both;
+    }
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 10px 0;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .check-row:hover { background: rgba(0,0,0,0.02); margin: 0 -8px; padding: 10px 8px; }
+    .checkbox-box {
+      width: 28px; height: 28px; flex-shrink: 0; margin-top: 2px;
+      border-radius: 8px; border-width: 2px; border-style: solid;
+      position: relative; transition: all 0.2s; display: flex;
+      align-items: center; justify-content: center;
+    }
+    .check-text {
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      line-height: 1.45;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .check-text.done { color: #bbb; }
+    .check-text.done::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      height: 2px;
+      background: #bbb;
+      border-radius: 1px;
+      animation: strikeThrough 0.3s ease forwards;
+    }
+
+    .progress-bar-track {
+      height: 6px; background: #f0ede6; border-radius: 99px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 99px; transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: #fafaf8;
+      border: 1.5px solid #e8e4dc;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-family: 'Caveat', cursive;
+      font-size: 19px;
+      color: #1a1a1a;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-top: 4px;
+    }
+    input[type="text"]:focus { border-color: #a0c89a; }
+    input[type="text"]::placeholder { color: #ccc; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #aaa; font-size: 13px; font-family: Inter, sans-serif;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .back-link:hover { color: #1a1a1a; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ── date helpers ── */
+const todayKey = () => new Date().toISOString().slice(0, 10);
+const SK_DAYS = ['nedeľa','pondelok','utorok','streda','štvrtok','piatok','sobota'];
+const SK_MONTHS = ['januára','februára','marca','apríla','mája','júna','júla','augusta','septembra','októbra','novembra','decembra'];
+const formatDate = d => `${SK_DAYS[d.getDay()]}, ${d.getDate()}. ${SK_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+
+/* ── data ── */
+const SECTIONS = [
+  {
+    id: 'vecer',
+    label: 'večer.',
+    subtitle: 'deň dozadu.',
+    emoji: '🌙',
+    color: '#4a72a8',
+    lightBg: '#eef3fa',
+    items: [
+      { id: 'plan',     text: 'Naplánuj zajtrajší deň' },
+      { id: 'main',     text: 'Jedna hlavná úloha, ktorej má deň patriť', hasInput: true, placeholder: 'čo je tá jedna vec...' },
+      { id: 'tasks',    text: 'Menšie úlohy sú zadané' },
+      { id: 'internet', text: 'Vypni internet, wi-fi aj dáta 📵' },
+    ]
+  },
+  {
+    id: 'rano',
+    label: 'ráno.',
+    subtitle: 'začni dobre.',
+    emoji: '🌅',
+    color: '#8a5a3a',
+    lightBg: '#faf4ee',
+    items: [
+      { id: 'gratitude', text: 'Posaď sa a poďakuj za možnosť žiť dnešný deň 🙏' },
+      { id: 'teeth',     text: 'Umy si zuby 🦷, to sa celkom hodí' },
+      { id: 'breakfast', text: 'Pomalé raňajky, bez telefónu' },
+      { id: 'coffee',    text: 'Čaj alebo kávička ☕, so srdcom' },
+      { id: 'remember',  text: 'Pamätaj na tvoj hlavný task dňa 🎯' },
+    ]
+  },
+  {
+    id: 'den',
+    label: 'počas dňa.',
+    subtitle: 'aspoň dvakrát.',
+    emoji: '☀️',
+    color: '#5a8a3a',
+    lightBg: '#eef6ea',
+    items: [
+      { id: 'slow1', text: '5 minút ticha, prvýkrát ○' },
+      { id: 'slow2', text: '5 minút ticha, druhýkrát — prechádzka bez slúchadiel, kávička, výhľad z okna... ○○' },
+    ]
+  },
+];
+
+/* ── checkbox ── */
+const CheckItem = ({ item, checked, onToggle, color, children }) => (
+  <div>
+    <div className="check-row" onClick={onToggle} role="checkbox" aria-checked={checked}>
+      <div className="checkbox-box" style={{ borderColor: checked ? color : '#ddd', background: checked ? color : 'transparent' }}>
+        {checked && (
+          <svg viewBox="0 0 22 22" width="16" height="16">
+            <path d="M4,12 L9,17 L18,6"
+              stroke="white" strokeWidth="2.5" fill="none"
+              strokeLinecap="round" strokeLinejoin="round"
+              style={{ strokeDasharray: 30, animation: 'checkDraw 0.35s cubic-bezier(0.16,1,0.3,1) forwards' }}
+            />
+          </svg>
+        )}
+      </div>
+      <span className={`check-text${checked ? ' done' : ''}`}>{item.text}</span>
+    </div>
+    {children}
+  </div>
+);
+
+/* ── progress ring ── */
+const ProgressRing = ({ pct, color, size = 52 }) => {
+  const r = 20, circ = 2 * Math.PI * r;
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx="24" cy="24" r={r} fill="none" stroke="#f0ede6" strokeWidth="4" />
+      <circle cx="24" cy="24" r={r} fill="none" stroke={color} strokeWidth="4"
+        strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
+        strokeLinecap="round"
+        style={{ transition: 'stroke-dashoffset 0.4s cubic-bezier(0.16,1,0.3,1)' }}
+      />
+    </svg>
+  );
+};
+
+/* ── section card ── */
+const SectionCard = ({ section, state, dispatch, delay }) => {
+  const total = section.items.length;
+  const done  = section.items.filter(i => state.checks[i.id]).length;
+  const pct   = total ? done / total : 0;
+  const allDone = done === total;
+
+  return (
+    <div className="section-card" style={{ animationDelay: `${delay}ms` }}>
+      {/* header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div>
+          <div style={{ fontSize: 13, color: '#bbb', fontFamily: 'Inter', letterSpacing: '0.04em', marginBottom: 2 }}>{section.subtitle}</div>
+          <h2 style={{ fontFamily: 'Lora, serif', fontSize: 32, fontWeight: 600, color: '#1a1a1a', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 26 }}>{section.emoji}</span>
+            {section.label}
+          </h2>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <ProgressRing pct={pct} color={section.color} />
+          <span style={{ fontSize: 11, color: '#aaa', fontFamily: 'Inter' }}>{done}/{total}</span>
+        </div>
+      </div>
+
+      {/* progress bar */}
+      <div className="progress-bar-track" style={{ marginBottom: 24 }}>
+        <div className="progress-bar-fill" style={{ width: `${pct * 100}%`, background: section.color }} />
+      </div>
+
+      {/* items */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {section.items.map(item => (
+          <CheckItem key={item.id} item={item} checked={!!state.checks[item.id]} color={section.color}
+            onToggle={() => dispatch({ type: 'TOGGLE', id: item.id })}>
+            {item.hasInput && (
+              <div style={{ paddingLeft: 42, paddingBottom: 6 }}>
+                <input type="text" placeholder={item.placeholder}
+                  value={state.inputs[item.id] || ''}
+                  onClick={e => e.stopPropagation()}
+                  onChange={e => dispatch({ type: 'INPUT', id: item.id, value: e.target.value })}
+                />
+              </div>
+            )}
+          </CheckItem>
+        ))}
+      </div>
+
+      {/* section complete */}
+      {allDone && (
+        <div style={{ marginTop: 20, padding: '12px 18px', background: section.lightBg, borderRadius: 14, display: 'flex', alignItems: 'center', gap: 10, animation: 'fadeIn 0.4s ease' }}>
+          <span style={{ fontSize: 20 }}>✨</span>
+          <span style={{ fontFamily: 'Caveat, cursive', fontSize: 18, color: section.color }}>
+            {section.id === 'vecer' ? 'Zajtrajšok má základ. Dobre spávaj.' :
+             section.id === 'rano'  ? 'Ráno zvládnuté. Dnes to bude dobré.' :
+                                      'Ticho nájdené. Deň žitý dobre.'}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── reducer ── */
+const load = () => {
+  try {
+    const raw = localStorage.getItem('slow_life_' + todayKey());
+    return raw ? JSON.parse(raw) : { checks: {}, inputs: {} };
+  } catch { return { checks: {}, inputs: {} }; }
+};
+
+const reducer = (state, action) => {
+  let next = state;
+  if (action.type === 'TOGGLE') {
+    next = { ...state, checks: { ...state.checks, [action.id]: !state.checks[action.id] } };
+  } else if (action.type === 'INPUT') {
+    next = { ...state, inputs: { ...state.inputs, [action.id]: action.value } };
+  } else if (action.type === 'RESET') {
+    next = { checks: {}, inputs: { ...state.inputs } };
+  }
+  localStorage.setItem('slow_life_' + todayKey(), JSON.stringify(next));
+  return next;
+};
+
+/* ── app ── */
+const totalItems = SECTIONS.reduce((s, sec) => s + sec.items.length, 0);
+
+function App() {
+  const [state, dispatch] = React.useReducer(reducer, null, load);
+  const totalDone = Object.values(state.checks).filter(Boolean).length;
+  const allDone = totalDone === totalItems;
+  const now = new Date();
+
+  return (
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '60px 24px 80px' }}>
+      {/* back */}
+      <a href="dominikzazo.html" className="back-link" style={{ marginBottom: 40, display: 'inline-flex' }}>
+        ← späť na web
+      </a>
+
+      {/* header */}
+      <div style={{ marginBottom: 48, marginTop: 16 }}>
+        <div style={{ fontSize: 13, color: '#bbb', fontFamily: 'Inter', letterSpacing: '0.04em', marginBottom: 8 }}>
+          {formatDate(now)}
+        </div>
+        <h1 style={{ fontFamily: 'Lora, serif', fontSize: 48, fontWeight: 400, lineHeight: 1.1, letterSpacing: '-0.02em', color: '#1a1a1a', marginBottom: 16 }}>
+          pomalé ráno.
+        </h1>
+        <p style={{ fontSize: 15, color: '#aaa', lineHeight: 1.7, fontFamily: 'Inter', maxWidth: 440, textWrap: 'pretty' }}>
+          Ráno začína deň dozadu. Priprav sa večer, žij pomaly ráno, nájdi si ticho cez deň.
+        </p>
+
+        {/* overall progress */}
+        <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ flex: 1 }}>
+            <div className="progress-bar-track">
+              <div className="progress-bar-fill" style={{ width: `${(totalDone/totalItems)*100}%`, background: 'linear-gradient(90deg, #4a72a8, #5a8a3a)' }} />
+            </div>
+          </div>
+          <span style={{ fontSize: 13, color: '#aaa', fontFamily: 'Caveat, cursive', fontSize: 17, flexShrink: 0 }}>
+            {totalDone} / {totalItems}
+          </span>
+          <button onClick={() => dispatch({ type: 'RESET' })}
+            style={{ border: '1.5px solid #ece8e0', borderRadius: 99, padding: '4px 14px', fontSize: 12, fontFamily: 'Inter', background: 'transparent', color: '#bbb', cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0 }}
+            onMouseEnter={e => { e.target.style.borderColor='#ccc'; e.target.style.color='#888'; }}
+            onMouseLeave={e => { e.target.style.borderColor='#ece8e0'; e.target.style.color='#bbb'; }}
+          >
+            resetuj
+          </button>
+        </div>
+      </div>
+
+      {/* all done! */}
+      {allDone && (
+        <div style={{ marginBottom: 32, padding: '24px 28px', background: 'linear-gradient(135deg, #f0f6ec, #ecf4f8)', borderRadius: 20, animation: 'celebrate 0.5s ease', textAlign: 'center' }}>
+          <div style={{ fontSize: 36, marginBottom: 10, animation: 'float 2s ease-in-out infinite' }}>🌿</div>
+          <div style={{ fontFamily: 'Caveat, cursive', fontSize: 26, color: '#5a7a56', marginBottom: 6 }}>Dnešok je tvoj.</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 13, color: '#aaa' }}>Všetko zaškrtnuté. Pomaly, vedome, s úmyslom.</div>
+        </div>
+      )}
+
+      {/* sections */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {SECTIONS.map((sec, i) => (
+          <SectionCard key={sec.id} section={sec} state={state} dispatch={dispatch} delay={i * 80} />
+        ))}
+      </div>
+
+      {/* quote */}
+      <div style={{ marginTop: 56, textAlign: 'center' }}>
+        <p style={{ fontFamily: 'Lora, serif', fontStyle: 'italic', fontSize: 16, color: '#ccc', lineHeight: 1.7 }}>
+          „Nauč sa byť ticho, aspoň chvíľku."
+        </p>
+        <p style={{ fontSize: 12, color: '#ddd', fontFamily: 'Inter', marginTop: 8 }}>
+          — Dominik Žažo · <a href="dominikzazo.sk" style={{ color: '#ddd', textDecoration: 'none' }}>dominikzazo.sk</a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

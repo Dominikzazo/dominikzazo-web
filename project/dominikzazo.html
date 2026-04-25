@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dominik Žažo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:#fafaf8;color:#1a1a1a;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+    ::selection{background:#c8d9c4}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-thumb{background:#e0e0da;border-radius:3px}
+    .page-enter{animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) forwards}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes heartFloat{0%{transform:translateY(0) scale(0.5);opacity:1}100%{transform:translateY(-70vh) scale(1.8);opacity:0}}
+    @keyframes steam{0%{opacity:0;transform:translateY(0) scaleX(1)}30%{opacity:.65;transform:translateY(-10px) scaleX(1.15)}80%{opacity:.2;transform:translateY(-24px) scaleX(1.4)}100%{opacity:0;transform:translateY(-30px)}}
+    @keyframes countPop{0%{transform:scale(0.7);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+    @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    .map-pill-label{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:500}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useReducer, useCallback } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{"accentColor":"#7aaa7e","cardRadius":22}/*EDITMODE-END*/;
+
+/* ── helpers ── */
+const Card = ({ children, style, onClick }) => {
+  const [h,setH]=useState(false);
+  return <div onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
+    style={{background:'#fff',borderRadius:22,boxShadow:h?'0 8px 40px rgba(0,0,0,0.10),0 2px 8px rgba(0,0,0,0.05)':'0 2px 16px rgba(0,0,0,0.06),0 1px 4px rgba(0,0,0,0.04)',transition:'box-shadow 0.25s,transform 0.25s',transform:h&&onClick?'translateY(-2px)':'none',cursor:onClick?'pointer':'default',overflow:'hidden',...style}}>{children}</div>;
+};
+const Tag = ({children,bg,color})=><span style={{display:'inline-block',padding:'2px 9px',borderRadius:99,fontSize:11,fontWeight:500,letterSpacing:'0.03em',background:bg||'#eef2eb',color:color||'#5a7a56',fontFamily:'Inter,sans-serif'}}>{children}</span>;
+const S = (s) => ({ fontSize:17,color:'#666',lineHeight:1.85,marginBottom:20,textWrap:'pretty',...s });
+const H2 = ({children}) => <h2 style={{fontFamily:'Lora,serif',fontSize:52,fontWeight:400,color:'#1a1a1a',marginBottom:12,letterSpacing:'-0.02em'}}>{children}</h2>;
+const Sub = ({children}) => <p style={{color:'#aaa',fontSize:15,marginBottom:56,fontFamily:'Inter'}}>{children}</p>;
+
+/* ── Coffee Transition Overlay ── */
+const CoffeeTrans = ({ target, onDone }) => {
+  const [count, setCount] = useState(5);
+  useEffect(()=>{
+    if(count<=0){onDone();return;}
+    const t=setTimeout(()=>setCount(c=>c-1),1000);
+    return()=>clearTimeout(t);
+  },[count]);
+  return (
+    <div style={{position:'fixed',inset:0,background:'#fafaf8',zIndex:999,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',animation:'fadeUp 0.3s ease'}}>
+      {/* Coffee cup SVG */}
+      <svg width="72" height="88" viewBox="0 0 72 88" style={{marginBottom:32}}>
+        {/* Steam wisps */}
+        {[22,36,50].map((x,i)=>(
+          <path key={x} d={`M${x},28 Q${x-4},18 ${x},8 Q${x+4},-2 ${x},−8`} stroke="#c9a96e" strokeWidth="2.5" fill="none" strokeLinecap="round"
+            style={{animation:`steam 2.4s steps(8) ${i*0.6}s infinite`,transformOrigin:`${x}px 18px`}}/>
+        ))}
+        {/* Cup body */}
+        <path d="M10,32 L14,80 Q36,90 58,80 L62,32 Z" fill="#1a1a1a" rx="4"/>
+        {/* Handle */}
+        <path d="M62,46 Q80,46 80,62 Q80,78 62,73" stroke="#1a1a1a" strokeWidth="5" fill="none" strokeLinecap="round"/>
+        {/* Coffee surface */}
+        <path d="M13,44 Q36,52 59,44" stroke="#c9a96e" strokeWidth="3" fill="none" strokeLinecap="round"/>
+      </svg>
+      <div key={count} style={{fontFamily:'Caveat,cursive',fontSize:42,color:'#1a1a1a',fontWeight:700,animation:'countPop 0.4s ease',marginBottom:10}}>
+        {count}
+      </div>
+      <div style={{fontFamily:'Lora,serif',fontStyle:'italic',fontSize:19,color:'#888',marginBottom:32}}>
+        Tento čas je pre teba..
+      </div>
+      <button onClick={onDone} style={{border:'1.5px solid #e0dcd6',borderRadius:99,padding:'8px 24px',fontSize:13,fontFamily:'Inter',background:'transparent',color:'#bbb',cursor:'pointer'}}>
+        preskočiť →
+      </button>
+    </div>
+  );
+};
+
+/* ── NAV ── */
+const navItems=[
+  {id:'home',label:'domov'},
+  {id:'maj',label:'máj 🌸'},
+  {id:'myslienky',label:'myšlienky'},
+  {id:'citam',label:'čítam'},
+  {id:'cestovanie',label:'cestovanie'},
+  {id:'projekty',label:'projekty 🟠'},
+  {id:'o-mne',label:'o mne'},
+];
+const Nav=({active,go})=>{
+  const[sc,setSc]=useState(false);
+  useEffect(()=>{const f=()=>setSc(window.scrollY>20);window.addEventListener('scroll',f);return()=>window.removeEventListener('scroll',f)},[]);
+  return(
+    <nav style={{position:'fixed',top:20,left:'50%',transform:'translateX(-50%)',zIndex:200,background:sc?'rgba(250,250,248,0.92)':'rgba(250,250,248,0.7)',backdropFilter:'blur(14px)',border:'1px solid rgba(0,0,0,0.07)',borderRadius:99,padding:'5px 6px',display:'flex',gap:2,boxShadow:'0 4px 24px rgba(0,0,0,0.08)',transition:'background 0.3s',flexWrap:'wrap',justifyContent:'center',maxWidth:'calc(100vw - 32px)'}}>
+      {navItems.map(item=>{
+        const isA=active===item.id;
+        return(
+          <button key={item.id} onClick={()=>go(item.id)}
+            style={{border:'none',borderRadius:99,padding:'6px 15px',fontSize:13,fontFamily:'Inter,sans-serif',fontWeight:isA?500:400,cursor:'pointer',background:isA?'#1a1a1a':'transparent',color:isA?'#fafaf8':'#666',transition:'all 0.2s',letterSpacing:'0.01em'}}>
+            {item.label}
+          </button>
+        );
+      })}
+      <button onClick={()=>window.open('slow-life.html','_blank')}
+        style={{border:'1.5px solid #e0dcd6',borderRadius:99,padding:'6px 15px',fontSize:13,fontFamily:'Inter,sans-serif',cursor:'pointer',background:'transparent',color:'#888',transition:'all 0.2s',letterSpacing:'0.01em'}}
+        onMouseEnter={e=>{e.currentTarget.style.background='#1a1a1a';e.currentTarget.style.color='#fafaf8';e.currentTarget.style.borderColor='#1a1a1a'}}
+        onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='#888';e.currentTarget.style.borderColor='#e0dcd6'}}>
+        ☕ pomalé ráno ↗
+      </button>
+    </nav>
+  );
+};
+
+/* ── HOME ── */
+const bento=[
+  {type:'photo',src:'uploads/IMG_1978 3.JPG',label:'Chemex moment'},
+  {type:'quote',text:'Najlepšia rada na svete: nauč sa byť ticho, aspoň chvíľku. 🌿',tags:['ticho']},
+  {type:'book',title:'O pôvode prosperity',author:'Rob Chovanculiak',tags:['čítam']},
+  {type:'now',text:'Teraz: druhá šálka z Chemexu a plánujem víkendový výlet rýchlikom. 🚄'},
+  {type:'photo',src:'uploads/IMG_0326 3.JPG',label:'Niekde na svete'},
+  {type:'thought',title:'O rannom písaní',preview:'Každé ráno päť minút. Bez tlaku, bez cieľa...',tags:['myšlienky']},
+];
+const Home=({go})=>{
+  const ref1=useRef(),ref2=useRef();
+  useEffect(()=>{
+    const f=()=>{
+      const y=window.scrollY;
+      if(ref1.current)ref1.current.style.transform=`translateY(${y*0.12}px)`;
+      if(ref2.current)ref2.current.style.transform=`translateY(${-y*0.10}px)`;
+    };
+    window.addEventListener('scroll',f,{passive:true});
+    return()=>window.removeEventListener('scroll',f);
+  },[]);
+  return(
+    <div className="page-enter" style={{maxWidth:1060,margin:'0 auto',padding:'120px 32px 80px'}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:64,alignItems:'start'}}>
+        <div>
+          <div style={{fontSize:13,color:'#aaa',letterSpacing:'0.06em',marginBottom:28}}>dominikzazo.sk</div>
+          <h1 style={{fontFamily:'Lora,serif',fontSize:40,fontWeight:500,lineHeight:1.25,color:'#1a1a1a',marginBottom:28,letterSpacing:'-0.01em'}}>Ahoj, ja som Dominik. 👋</h1>
+          <p style={S()}>Mám 22 rokov, pijem <strong style={{color:'#1a1a1a',fontWeight:500}}>Chemex</strong> ako keby od toho závisel život a moja najlepšia life advice? <strong style={{color:'#1a1a1a',fontWeight:500}}>Nauč sa byť ticho, aspoň chvíľku.</strong> 🌿</p>
+          <p style={S()}>Baví ma <strong style={{color:'#1a1a1a',fontWeight:500}}>spomalenie</strong>, každý deň <strong style={{color:'#1a1a1a',fontWeight:500}}>žurnálujem</strong>, cestujem rýchlikom kedykoľvek sa dá 🚄 a tajne si myslím, že <strong style={{color:'#1a1a1a',fontWeight:500}}>Traja pátrači</strong> sú najlepšia detektívka ever.</p>
+          <p style={S({marginBottom:48})}>Toto je môj <strong style={{color:'#1a1a1a',fontWeight:500}}>vedomý kút internetu</strong>. Pomaly. Zámerne. Ľudsky.</p>
+          <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+            {[{l:'myšlienky →',t:'myslienky'},{l:'o mne →',t:'o-mne'}].map(b=>(
+              <button key={b.t} onClick={()=>go(b.t)}
+                style={{border:'1.5px solid #e0e0dc',borderRadius:99,padding:'10px 22px',fontSize:14,fontFamily:'Inter',background:'transparent',color:'#444',cursor:'pointer',transition:'all 0.2s'}}
+                onMouseEnter={e=>{e.currentTarget.style.background='#1a1a1a';e.currentTarget.style.color='#fafaf8';e.currentTarget.style.borderColor='#1a1a1a'}}
+                onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='#444';e.currentTarget.style.borderColor='#e0e0dc'}}>
+                {b.l}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          {bento.map((e,i)=>(
+            <div key={i} style={{background:'#fff',borderRadius:22,boxShadow:'0 2px 16px rgba(0,0,0,0.05)',overflow:'hidden',padding:e.type==='photo'?0:20,ref:i===0?ref1:i===4?ref2:undefined}}
+              ref={i===0?ref1:i===4?ref2:undefined}>
+              {e.type==='photo'&&<img src={e.src} alt={e.label} style={{width:'100%',height:178,objectFit:'cover',display:'block'}}/>}
+              {e.type==='quote'&&<><p style={{fontSize:14,fontFamily:'Lora,serif',fontStyle:'italic',color:'#333',lineHeight:1.6,marginBottom:12}}>{e.text}</p><div style={{display:'flex',gap:5,flexWrap:'wrap'}}>{e.tags.map(t=><Tag key={t}>{t}</Tag>)}</div></>}
+              {e.type==='book'&&<><div style={{fontSize:10,letterSpacing:'0.08em',color:'#aaa',textTransform:'uppercase',marginBottom:8}}>momentálne čítam 📖</div><div style={{fontSize:15,fontFamily:'Lora,serif',fontWeight:600,color:'#1a1a1a',marginBottom:4}}>{e.title}</div><div style={{fontSize:12,color:'#888',marginBottom:10}}>{e.author}</div><div style={{display:'flex',gap:5}}>{e.tags.map(t=><Tag key={t}>{t}</Tag>)}</div></>}
+              {e.type==='now'&&<><div style={{fontSize:11,letterSpacing:'0.08em',color:'#7aaa7e',textTransform:'uppercase',marginBottom:8,fontWeight:500}}>○ teraz</div><div style={{fontSize:13,color:'#555',lineHeight:1.7}}>{e.text}</div></>}
+              {e.type==='thought'&&<><div style={{display:'flex',gap:5,marginBottom:8,flexWrap:'wrap'}}>{e.tags.map(t=><Tag key={t}>{t}</Tag>)}</div><div style={{fontSize:15,fontFamily:'Lora,serif',fontWeight:600,color:'#1a1a1a',marginBottom:5}}>{e.title}</div><div style={{fontSize:12,color:'#888',lineHeight:1.6}}>{e.preview}</div></>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── MÁJ ── */
+const Maj=()=>(
+  <div className="page-enter" style={{maxWidth:680,margin:'0 auto',padding:'120px 32px 80px'}}>
+    <div style={{fontSize:13,color:'#aaa',letterSpacing:'0.06em',marginBottom:16,fontFamily:'Inter'}}>april → máj 2025</div>
+    <H2>máj. 🌸</H2>
+    <Sub>Čo ma čaká tento mesiac. Živý zápisník.</Sub>
+    <Card style={{padding:'32px 36px',marginBottom:20}}>
+      <div style={{fontSize:11,color:'#7aaa7e',letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:16,fontWeight:500}}>jedna hlavná vec</div>
+      <p style={{fontFamily:'Lora,serif',fontSize:22,fontWeight:600,color:'#1a1a1a',lineHeight:1.3,marginBottom:12}}>Čítať viac, scrollovať menej. 📵</p>
+      <p style={{fontSize:15,color:'#888',lineHeight:1.7}}>Experiment: každý deň aspoň 30 minút skutočnej knihy pred tým, než siahnem po telefóne.</p>
+    </Card>
+    {[
+      {emoji:'🚄',text:'Plánovaný výlet rýchlikom niekde nové. Destinácia: surprise.'},
+      {emoji:'📷',text:'Odfotiť aspoň 5 vecí, ktoré by väčšina ľudí prehliadla.'},
+      {emoji:'🚲',text:'Prvá dlhšia jarná jazda na bicykli. Cesta, nie cieľ.'},
+      {emoji:'🙏',text:'Ráno tichšie ako minulý mesiac. Päť minút naviac.'},
+      {emoji:'📖',text:'Dokončiť Inspiráciu Baťa a napísať si tri veci, čo si z toho beriem.'},
+    ].map((i,idx)=>(
+      <div key={idx} style={{display:'flex',gap:16,alignItems:'flex-start',padding:'16px 0',borderBottom:idx<4?'1px solid #f0f0ee':'none'}}>
+        <span style={{fontSize:22,flexShrink:0,marginTop:2}}>{i.emoji}</span>
+        <p style={{fontSize:16,color:'#555',lineHeight:1.7,fontFamily:'Lora,serif'}}>{i.text}</p>
+      </div>
+    ))}
+    <div style={{marginTop:40,background:'#f7f7f4',borderRadius:18,padding:'20px 24px'}}>
+      <p style={{fontFamily:'Caveat,cursive',fontSize:22,color:'#888',lineHeight:1.6}}>"Máj je jediný mesiac, kde každý ráno vyzerá ako sľub." 🌿</p>
+    </div>
+  </div>
+);
+
+/* ── MYŠLIENKY + SUBSTACK ── */
+const localThoughts=[
+  {slug:'vlaky',date:'12. apríla 2025',title:'Prečo milujem vlaky 🚄',tags:['cestovanie','pomalý život'],preview:'Vlak ťa donúti sedieť a nič nerobiť. A to je presne to, čo potrebuješ.',body:`Vlak ťa donúti sedieť a nič nerobiť. A to je presne to, čo potrebuješ.\n\nKeď cestujem autom alebo lietadlom, som v pohybe, ale nie naozaj prítomný. Vo vlaku si uvedomíš, že krajina plynie okolo a ty si len tam.\n\nPovažan som za vlakového nájomníka. Rýchlik Bratislava, Považan. Soundtrack dňa. 🚄`},
+  {slug:'rano',date:'24. apríla 2025',title:'O rannom písaní',tags:['žurnálovanie','rutina'],preview:'Každé ráno päť minút. Bez tlaku, bez cieľa. Len pero a papier.',body:`Každé ráno päť minút. Bez tlaku, bez cieľa.\n\nDlho som si myslel, že žurnálovanie je pre ľudí, ktorí majú čo povedať. Ja som mal len chaos.\n\nA práve preto to fungovalo. Chaos sa na papieri stáva čitateľným.\n\nPäť minút. Každý deň. To je všetko.`},
+  {slug:'ticho',date:'18. apríla 2025',title:'Ticho v meste',tags:['ticho','mestský život'],preview:'Myslel som si, že ticho nájdem len v prírode. Mýlil som sa.',body:`Myslel som si, že ticho nájdem len v prírode. Mýlil som sa.\n\nTicho nie je o absencii zvuku. Je to o prítomnosti. O tom, byť naozaj tam, kde si.\n\nAj uprostred mesta môžeš byť v tichu, ak si ho vybereš.`},
+];
+const ThoughtDetail=({t,onBack})=>(
+  <div className="page-enter" style={{maxWidth:660,margin:'0 auto',padding:'120px 32px 80px'}}>
+    <button onClick={onBack} style={{border:'none',background:'transparent',color:'#aaa',fontSize:13,cursor:'pointer',marginBottom:48,fontFamily:'Inter',padding:0}}>← späť</button>
+    <div style={{display:'flex',gap:8,marginBottom:20,flexWrap:'wrap'}}>{(t.tags||[]).map(tg=><Tag key={tg}>{tg}</Tag>)}</div>
+    <h2 style={{fontFamily:'Lora,serif',fontSize:34,fontWeight:500,color:'#1a1a1a',marginBottom:12,lineHeight:1.25}}>{t.title}.</h2>
+    <div style={{color:'#bbb',fontSize:13,marginBottom:48,fontFamily:'Inter'}}>{t.date||t.pubDate}</div>
+    {(t.body||t.description||'').split('\n\n').map((p,i)=><p key={i} style={{fontSize:18,color:'#444',lineHeight:1.85,marginBottom:28,fontFamily:'Lora,serif'}}>{p}</p>)}
+    {t.link&&<a href={t.link} target="_blank" rel="noreferrer" style={{display:'inline-flex',alignItems:'center',gap:8,border:'1.5px solid #e0e0dc',borderRadius:99,padding:'10px 22px',fontSize:14,fontFamily:'Inter',color:'#444',textDecoration:'none'}}>Čítaj na Substack ↗</a>}
+  </div>
+);
+const Myslienky=()=>{
+  const[sel,setSel]=useState(null);
+  const[posts,setPosts]=useState([]);
+  const[loading,setLoading]=useState(true);
+  useEffect(()=>{
+    fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fdominikzazo.substack.com%2Ffeed&count=6')
+      .then(r=>r.json()).then(d=>{if(d.items)setPosts(d.items.slice(0,4));})
+      .catch(()=>{}).finally(()=>setLoading(false));
+  },[]);
+  if(sel)return<ThoughtDetail t={sel} onBack={()=>setSel(null)}/>;
+  const allItems=[...localThoughts,...posts.map(p=>({...p,isSubstack:true}))];
+  return(
+    <div className="page-enter" style={{maxWidth:760,margin:'0 auto',padding:'120px 32px 80px'}}>
+      <H2>myšlienky.</H2>
+      <Sub>Reflexie z denníka. Veci zo Substacku. Záznamy, ktoré stoja za to.</Sub>
+      <div style={{display:'flex',flexDirection:'column',gap:16}}>
+        {allItems.map((t,i)=>(
+          <Card key={i} onClick={()=>setSel(t)} style={{padding:'24px 28px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10,flexWrap:'wrap',gap:8}}>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
+                {(t.tags||[]).map(tg=><Tag key={tg}>{tg}</Tag>)}
+                {t.isSubstack&&<Tag bg="#ff6719" color="#fff">substack</Tag>}
+              </div>
+              <span style={{fontSize:12,color:'#ccc',fontFamily:'Inter'}}>{t.date||new Date(t.pubDate).toLocaleDateString('sk-SK',{day:'numeric',month:'long',year:'numeric'})}</span>
+            </div>
+            <h3 style={{fontFamily:'Lora,serif',fontSize:21,fontWeight:600,color:'#1a1a1a',marginBottom:7,lineHeight:1.3}}>{t.title}</h3>
+            <p style={{fontSize:14,color:'#888',lineHeight:1.7}}>{t.preview||t.description?.replace(/<[^>]*>/g,'').slice(0,120)+'...'}</p>
+          </Card>
+        ))}
+        {loading&&<div style={{textAlign:'center',padding:32,color:'#ccc',fontSize:13}}>načítavam Substack... ☕</div>}
+        {!loading&&posts.length===0&&<div style={{textAlign:'center',padding:'16px 0',color:'#ddd',fontSize:13,fontFamily:'Lora,serif',fontStyle:'italic'}}>Substack články sa načítajú priamo z dominikzazo.substack.com</div>}
+      </div>
+      <div style={{marginTop:40,textAlign:'center'}}>
+        <a href="https://dominikzazo.substack.com" target="_blank" rel="noreferrer"
+          style={{display:'inline-flex',alignItems:'center',gap:8,border:'1.5px solid #e0e0dc',borderRadius:99,padding:'10px 24px',fontSize:14,fontFamily:'Inter',color:'#444',textDecoration:'none'}}>
+          všetky články na Substack ↗
+        </a>
+      </div>
+    </div>
+  );
+};
+
+/* ── ČÍTAM ── */
+const books=[
+  {title:'O pôvode prosperity',author:'Rob Chovanculiak',status:'práve čítam',year:2025,note:'Konečne ekonómia, ktorá mi dáva zmysel.',tags:['ekonómia','filozofia']},
+  {title:'Inspirace Baťa',author:'Gabriela Končitíková',status:'práve čítam',year:2025,note:'Baťa bol možno najväčší slow thinker v biznise.',tags:['história','inšpirácia']},
+  {title:'Stillness Is the Key',author:'Ryan Holiday',status:'prečítané',year:2025,note:'Najlepšia knižka o tichu, ktorú som čítal.',tags:['ticho','filozofia']},
+  {title:"The Artist's Way",author:'Julia Cameron',status:'prečítané',year:2024,note:'Ranné strany mi zmenili život. Vážne.',tags:['kreativita','žurnálovanie']},
+  {title:'Slow',author:'Brooke McAlary',status:'prečítané',year:2024,note:'Praktické a ľudské. Odporúčam každému.',tags:['spomalenie']},
+  {title:'In Praise of Slowness',author:'Carl Honoré',status:'chcem čítať',year:null,note:null,tags:['spomalenie']},
+];
+const stC={'práve čítam':'#7aaa7e','prečítané':'#bbb','chcem čítať':'#c9a96e'};
+const Citam=()=>(
+  <div className="page-enter" style={{maxWidth:900,margin:'0 auto',padding:'120px 32px 80px'}}>
+    <H2>čítam.</H2>
+    <div style={{display:'flex',gap:14,marginBottom:48,flexWrap:'wrap'}}>
+      {Object.entries(stC).map(([s,c])=><span key={s} style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'#888'}}><span style={{width:8,height:8,borderRadius:99,background:c,display:'inline-block'}}></span>{s}</span>)}
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:14}}>
+      {books.map((b,i)=>(
+        <Card key={i} style={{padding:24}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+            <span style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:stC[b.status],fontWeight:500}}><span style={{width:6,height:6,borderRadius:99,background:stC[b.status],display:'inline-block'}}></span>{b.status}</span>
+            {b.year&&<span style={{fontSize:11,color:'#ddd'}}>{b.year}</span>}
+          </div>
+          <h3 style={{fontFamily:'Lora,serif',fontSize:16,fontWeight:600,color:'#1a1a1a',marginBottom:4,lineHeight:1.3}}>{b.title}</h3>
+          <p style={{fontSize:13,color:'#aaa',marginBottom:b.note?12:0}}>{b.author}</p>
+          {b.note&&<p style={{fontSize:13,color:'#666',lineHeight:1.6,fontFamily:'Lora,serif',fontStyle:'italic',borderTop:'1px solid #f0f0ee',paddingTop:12}}>„{b.note}"</p>}
+          <div style={{display:'flex',gap:5,flexWrap:'wrap',marginTop:12}}>{b.tags.map(t=><Tag key={t}>{t}</Tag>)}</div>
+        </Card>
+      ))}
+    </div>
+  </div>
+);
+
+/* ── HANDWRITTEN MAP ── */
+// Equirectangular: lon -30..65 → x 0..880, lat 20..73 → y 0..520
+const mp=(lon,lat)=>({x:(lon+30)/95*880,y:(73-lat)/53*520});
+const MAP_CITIES=[
+  {name:'Bratislava',lon:17.1,lat:48.1,status:'home',emoji:'🏠',note:'Môj domov, môj chaos, moja láska.'},
+  {name:'Praha',lon:14.4,lat:50.1,status:'visited',emoji:'🍺',note:'Starý Barrandov, Vltava, klobása.'},
+  {name:'Viedeň',lon:16.4,lat:48.2,status:'visited',emoji:'☕',note:'Kaviarňová kultúra na ďalšiu úroveň.'},
+  {name:'Budapešť',lon:19.0,lat:47.5,status:'visited',emoji:'🌊',note:'Kúpele Széchenyi, ruin bars, Dunaj.'},
+  {name:'Krakov',lon:19.9,lat:50.1,status:'visited',emoji:'🥨',note:'Stredoveká krása. Obedy za 4€.'},
+  {name:'Rím',lon:12.5,lat:41.9,status:'visited',emoji:'🍕',note:'Fontána di Trevi, pizza al taglio.'},
+  {name:'Tenerife',lon:-16.3,lat:28.3,status:'last',emoji:'🌋',note:'Naposledy! Sopka Teide, západ slnka. 😍'},
+  {name:'Oslo',lon:10.7,lat:59.9,status:'wishlist',emoji:'🏔️',note:'Fjordy, losos, a ceny čo ma zničia.'},
+  {name:'Edinburgh',lon:-3.2,lat:55.9,status:'wishlist',emoji:'🏰',note:'Škótske hrady a whisky.'},
+  {name:'Tbilisi',lon:44.8,lat:41.7,status:'wishlist',emoji:'🍷',note:'Gruzínske víno a khachapuri.'},
+];
+const dotCol={home:'#1a1a1a',visited:'#5a9a5e',last:'#c06060',wishlist:'#c9a96e'};
+const pillW=(city)=>(city.emoji.length+city.name.length)*6.8+22;
+
+const HandwrittenMap=({onHover})=>(
+  <svg viewBox="0 0 880 520" style={{width:'100%',display:'block',background:'#fdf9f0',borderRadius:20,border:'1px solid #ebe6dc'}}>
+    <defs>
+      <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.018 0.022" numOctaves="2" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.8" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <style>{`.mp:hover{opacity:.85;cursor:pointer}`}</style>
+    </defs>
+    {/* Paper grid */}
+    {[...Array(9)].map((_,i)=><line key={'v'+i} x1={i*110} y1="0" x2={i*110} y2="520" stroke="#e8e2d8" strokeWidth="0.5"/>)}
+    {[...Array(6)].map((_,i)=><line key={'h'+i} x1="0" y1={i*104} x2="880" y2={i*104} stroke="#e8e2d8" strokeWidth="0.5"/>)}
+
+    {/* Landmasses */}
+    <g filter="url(#rough)" stroke="#a89880" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" fill="#ede6d4">
+      {/* Main Europe */}
+      <path d="M194,304 L194,354 L228,366 L262,356 L244,246 L298,218 L324,198 L371,144 L407,170 L433,144 L491,79 L601,45 L645,54 L667,176 L714,180 L730,208 L666,292 L547,318 L483,357 L464,329 L428,306 L426,356 L405,348 L362,295 L344,293 C310,306 289,356 228,366 Z"/>
+      {/* N Africa */}
+      <path d="M0,440 L160,432 L280,436 L400,430 L520,434 L640,428 L760,432 L880,426 L880,520 L0,520 Z" fill="#e0d8c4"/>
+      {/* British Isles */}
+      <path d="M242,222 L255,212 L277,220 L284,234 L278,250 L262,254 L246,244 Z"/>
+      <path d="M242,222 L255,210 L260,196 L270,183 L279,191 L280,210 L263,218 Z"/>
+      <path d="M228,226 L240,220 L242,234 L235,242 L224,237 Z"/>
+      {/* Iceland */}
+      <path d="M198,116 L217,110 L234,116 L232,130 L215,134 L198,124 Z"/>
+      {/* Canaries */}
+      <circle cx="127" cy="440" r="9"/>
+    </g>
+
+    {/* City dots + pills */}
+    {MAP_CITIES.map(city=>{
+      const p=mp(city.lon,city.lat);
+      const col=dotCol[city.status];
+      const r=city.status==='home'?7:city.status==='last'?9:5.5;
+      const pw=pillW(city);
+      const px=Math.min(p.x+14,880-pw-4);
+      const py=p.y-28;
+      return(
+        <g key={city.name} className="mp" onMouseEnter={()=>onHover(city)} onMouseLeave={()=>onHover(null)}>
+          {city.status==='last'&&<circle cx={p.x} cy={p.y} r={r+8} fill={col} opacity="0.15" style={{animation:'floatY 2s ease-in-out infinite'}}/>}
+          <circle cx={p.x} cy={p.y} r={r} fill={col} stroke="white" strokeWidth="1.8"/>
+          {city.status==='wishlist'&&<circle cx={p.x} cy={p.y} r={r+4} fill="none" stroke={col} strokeWidth="1.5" strokeDasharray="3,2" opacity="0.6"/>}
+          {/* Pill */}
+          <rect x={px} y={py} width={pw} height={19} rx={9.5} fill={col} opacity="0.92"/>
+          <text x={px+10} y={py+13} className="map-pill-label" fill="white">{city.emoji} {city.name}</text>
+        </g>
+      );
+    })}
+
+    {/* Legend */}
+    <g fontFamily="Inter,sans-serif" fontSize="11" fill="#aaa">
+      {[{c:dotCol.home,l:'domov'},{c:dotCol.visited,l:'navštívené'},{c:dotCol.last,l:'naposledy'},{c:dotCol.wishlist,l:'wishlist'}].map((i,idx)=>(
+        <g key={i.l} transform={`translate(${16+idx*112},505)`}>
+          <circle cx="6" cy="0" r="5" fill={i.c}/><text x="14" y="4">{i.l}</text>
+        </g>
+      ))}
+    </g>
+  </svg>
+);
+
+/* ── CESTOVANIE ── */
+const places=MAP_CITIES.concat([{name:'Tokio',lon:139.7,lat:35.7,status:'wishlist',emoji:'🍜',note:'Dlhodobý sen. Vlaky tam musia byť fenomenálne.'}]);
+const Cestovanie=()=>{
+  const[hov,setHov]=useState(null);
+  const[filter,setFilter]=useState('all');
+  const filt=filter==='all'?places:places.filter(p=>p.status===filter);
+  return(
+    <div className="page-enter" style={{maxWidth:1000,margin:'0 auto',padding:'120px 32px 80px'}}>
+      <H2>cestovanie.</H2>
+      <p style={{color:'rgb(161,161,161)',fontSize:15,marginBottom:36,fontFamily:'Inter',fontWeight:400}}>Plánované aj random. Rýchlikom, vždy rýchlikom. 🚄</p>
+      <HandwrittenMap onHover={setHov}/>
+      {hov&&(
+        <div style={{marginTop:14,padding:'14px 20px',background:'#fff',borderRadius:16,display:'flex',alignItems:'center',gap:12,boxShadow:'0 2px 16px rgba(0,0,0,0.06)',animation:'fadeUp 0.2s ease'}}>
+          <span style={{fontSize:22}}>{hov.emoji}</span>
+          <div><div style={{fontFamily:'Lora,serif',fontSize:16,fontWeight:600,color:'#1a1a1a',marginBottom:2}}>{hov.name}</div><div style={{fontSize:13,color:'#888'}}>{hov.note}</div></div>
+          <span style={{marginLeft:'auto',fontSize:11,padding:'3px 10px',borderRadius:99,background:dotCol[hov.status]+'22',color:dotCol[hov.status],fontFamily:'Inter',fontWeight:500}}>{hov.status==='home'?'domov':hov.status==='visited'?'navštívené':hov.status==='last'?'naposledy':'wishlist'}</span>
+        </div>
+      )}
+      <div style={{marginTop:14,padding:'14px 20px',background:'#fff8ee',borderRadius:16,border:'1.5px dashed #c9a96e',display:'flex',alignItems:'center',gap:12,marginBottom:40}}>
+        <span style={{fontSize:20}}>🍜</span>
+        <span style={{fontSize:13,color:'#888'}}><strong style={{color:'#1a1a1a'}}>Tokio</strong> je na mape mimo záber, ale na mojom zozname číslo 1. Vlaky tam musia byť fenomenálne.</span>
+      </div>
+      <div style={{display:'flex',gap:8,marginBottom:24,flexWrap:'wrap'}}>
+        {['all','visited','last','wishlist'].map(f=>(
+          <button key={f} onClick={()=>setFilter(f)} style={{border:'none',borderRadius:99,padding:'6px 16px',fontSize:12,fontFamily:'Inter',cursor:'pointer',background:filter===f?'#1a1a1a':'#f0f0ee',color:filter===f?'#fff':'#666',transition:'all 0.2s'}}>
+            {f==='all'?'všetko':f==='visited'?'bol som':f==='last'?'naposledy':'chcem ísť'}
+          </button>
+        ))}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(210px,1fr))',gap:12}}>
+        {filt.map(p=>(
+          <Card key={p.name} style={{padding:'18px 20px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+              <span style={{fontSize:20}}>{p.emoji}</span>
+              <span style={{width:8,height:8,borderRadius:99,background:dotCol[p.status],display:'inline-block'}}></span>
+            </div>
+            <div style={{fontFamily:'Lora,serif',fontSize:15,fontWeight:600,color:'#1a1a1a',marginBottom:4}}>{p.name}</div>
+            <div style={{fontSize:12,color:'#888',lineHeight:1.5}}>{p.note}</div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+/* ── PROJEKTY ── */
+const Projekty=()=>{
+  const BtnStyle=(extra)=>({display:'inline-flex',alignItems:'center',gap:10,borderRadius:99,padding:'13px 26px',fontSize:14,fontFamily:'Inter',fontWeight:600,textDecoration:'none',transition:'all 0.22s',...extra});
+  return(
+    <div className="page-enter" style={{maxWidth:760,margin:'0 auto',padding:'120px 32px 80px'}}>
+      <H2>projekty. 🟠</H2>
+      <Sub>Veci, na ktorých pracujem alebo mi záleží.</Sub>
+
+      {/* Bitcoin dark card */}
+      <div style={{background:'#111',borderRadius:24,padding:'40px',marginBottom:14,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-70,right:-70,width:220,height:220,background:'#f7931a',borderRadius:'50%',filter:'blur(90px)',opacity:0.28,pointerEvents:'none'}}/>
+        <div style={{position:'absolute',bottom:-20,left:-10,fontSize:120,opacity:0.06,lineHeight:1,userSelect:'none',pointerEvents:'none'}}>₿</div>
+        <div style={{fontSize:11,color:'#f7931a',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:14,fontWeight:600}}>bitcoinový konzultant</div>
+        <h3 style={{fontFamily:'Lora,serif',fontSize:32,fontWeight:600,color:'#fff',marginBottom:12,lineHeight:1.2}}>Bitcoinová škola.</h3>
+        <p style={{fontSize:15,color:'rgba(255,255,255,0.6)',lineHeight:1.8,marginBottom:28,maxWidth:500,textWrap:'pretty'}}>
+          Nie preto, že som prehajpovaný z kryptomien. Ale preto, že bitcoin chráni tvoj čas a prácu pred infláciou.
+          Od človeka, ktorý nevie čiarku z bitcoinu, po pravidelné a rozumné sporenie. 🔐
+        </p>
+        <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+          <a href="https://bitcoinovaskola.sk" target="_blank" rel="noreferrer"
+            style={BtnStyle({background:'#f7931a',color:'#fff',boxShadow:'0 4px 28px rgba(247,147,26,0.45)'})}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px) scale(1.03)';e.currentTarget.style.boxShadow='0 10px 44px rgba(247,147,26,0.6)'}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 4px 28px rgba(247,147,26,0.45)'}}>
+            <span style={{fontSize:18}}>₿</span> Bitcoinová škola ↗
+          </a>
+          <a href="https://bitcoinovaskola.sk/quiz" target="_blank" rel="noreferrer"
+            style={BtnStyle({border:'1.5px solid rgba(247,147,26,0.35)',color:'rgba(255,255,255,0.65)',background:'transparent',fontWeight:400})}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor='#f7931a';e.currentTarget.style.color='#fff'}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(247,147,26,0.35)';e.currentTarget.style.color='rgba(255,255,255,0.65)'}}>
+            🧠 Quiz zadarmo
+          </a>
+        </div>
+      </div>
+      <div style={{background:'#fff9f3',borderRadius:16,padding:'16px 20px',border:'1.5px solid rgba(247,147,26,0.18)',display:'flex',gap:12,alignItems:'center',marginBottom:32}}>
+        <span style={{fontSize:20}}>🧠</span>
+        <div><div style={{fontSize:13,fontWeight:600,color:'#1a1a1a',marginBottom:2}}>Quiz zadarmo, personalizovaný priamo pre teba</div>
+        <div style={{fontSize:13,color:'#aaa'}}>Najlepší štart do Bitcoinu: <a href="https://bitcoinovaskola.sk/quiz" target="_blank" rel="noreferrer" style={{color:'#f7931a',textDecoration:'none'}}>bitcoinovaskola.sk/quiz ↗</a></div></div>
+      </div>
+
+      {/* Substack card */}
+      <Card style={{padding:'32px 36px'}}>
+        <div style={{display:'flex',gap:20,alignItems:'flex-start'}}>
+          <div style={{fontSize:36,flexShrink:0}}>✍️</div>
+          <div>
+            <div style={{fontSize:11,color:'#ff6719',letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:10,fontWeight:500}}>substack newsletter</div>
+            <h3 style={{fontFamily:'Lora,serif',fontSize:24,fontWeight:600,color:'#1a1a1a',marginBottom:8}}>(Ako) Žiť uvedomelý život.</h3>
+            <p style={{fontSize:15,color:'#888',lineHeight:1.7,marginBottom:20,textWrap:'pretty'}}>Myšlienky o spomalení, žurnálovaní a vedomom živote. Priamo do tvojho emailu. Pomaly, ako to tu máme radi.</p>
+            <a href="https://dominikzazo.substack.com" target="_blank" rel="noreferrer"
+              style={{display:'inline-flex',alignItems:'center',gap:8,background:'#ff6719',borderRadius:99,padding:'10px 22px',fontSize:14,fontFamily:'Inter',fontWeight:500,color:'#fff',textDecoration:'none'}}>
+              Čítaj na Substack ↗
+            </a>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+/* ── O MNE ── */
+const OMne=({go})=>(
+  <div className="page-enter" style={{maxWidth:740,margin:'0 auto',padding:'120px 32px 80px'}}>
+    {/* Hero row */}
+    <div style={{display:'grid',gridTemplateColumns:'1fr 200px',gap:48,alignItems:'start',marginBottom:48}}>
+      <div>
+        <H2>o mne.</H2>
+        <p style={S({fontSize:18,fontFamily:'Lora,serif'})}>Ahoj! Som Dominik, mám 22 rokov, som z Považana a snažím sa žiť pomaly v dobe, ktorá nás všetkých tlačí do rýchlosti. 🌱</p>
+        <p style={S()}>Ráno začínam <strong style={{color:'#1a1a1a',fontWeight:500}}>Chemexom</strong> ☕, potom žurnálujem a až potom sa pozriem na telefón. Pracujem v <strong style={{color:'#1a1a1a',fontWeight:500}}>Amityage</strong> a popri tom pomáham ľuďom porozumieť <strong style={{color:'#1a1a1a',fontWeight:500}}>Bitcoinu</strong>. 🟠</p>
+        <p style={S()}>Fanúšik <strong style={{color:'#1a1a1a',fontWeight:500}}>Mariánskej mládeže</strong> 🙏, amatérsky <strong style={{color:'#1a1a1a',fontWeight:500}}>volejbalista</strong> 🏐 a profesionálny užívač <strong style={{color:'#1a1a1a',fontWeight:500}}>skórovania</strong> 😄. Kofola je moja slabosť. Závislosť? Možno. :OO</p>
+        <p style={S({marginBottom:0})}>Milujem <strong style={{color:'#1a1a1a',fontWeight:500}}>gýčové havajské košele</strong> 🌺 a kto povie, že Traja pátrači nie sú top, nemáme čo riešiť.</p>
+      </div>
+      <img src="uploads/IMG_9642 2.JPG" alt="Dominik" style={{width:'100%',height:280,objectFit:'cover',objectPosition:'center top',borderRadius:20,display:'block'}}/>
+    </div>
+
+    {/* Fun facts grid */}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:48}}>
+      {[
+        {e:'☕',t:'Chemex adept',d:'Pomalá káva pre pomalý deň.'},
+        {e:'🧦',t:'Parkside fanúšik',d:'Lidl merch je underrated.'},
+        {e:'🟠',t:'Bitcoin konzultant',d:'Chráni tvoj čas pred infláciou.'},
+        {e:'🚄',t:'Vlakový nájomník',d:'Považan, Bratislava, Považan...'},
+        {e:'🏐',t:'Amatér volejbalista',d:'Profík na skórovanie. 😄'},
+        {e:'🌺',t:'Havajské košele',d:'Gýčové? Áno. Obanovaním? Nikdy.'},
+        {e:'🚲',t:'Bicykel',d:'Cesta, nie cieľ. Vždy.'},
+        {e:'🙏',t:'ZMM a viera',d:'Mariánska mládež, každodenná.'},
+        {e:'🥤',t:'Kofola závislosť',d:'...závislosť je silné slovo. Alebo nie? :OO'},
+      ].map((f,i)=>(
+        <div key={i} style={{background:'#f7f7f5',borderRadius:16,padding:'14px 16px'}}>
+          <div style={{fontSize:20,marginBottom:7}}>{f.e}</div>
+          <div style={{fontSize:12,fontWeight:600,color:'#1a1a1a',marginBottom:2}}>{f.t}</div>
+          <div style={{fontSize:11,color:'#999',lineHeight:1.5}}>{f.d}</div>
+        </div>
+      ))}
+    </div>
+
+    {/* Photo gallery — floating scattered */}
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:48,alignItems:'end'}}>
+      <img src="uploads/IMG_3451.JPG" alt="túra" style={{width:'100%',height:200,objectFit:'cover',objectPosition:'center top',borderRadius:16,display:'block',transform:'rotate(-2.5deg)',boxShadow:'0 6px 24px rgba(0,0,0,0.10)'}}/>
+      <img src="uploads/IMG_0932.JPG" alt="Rím" style={{width:'100%',height:220,objectFit:'cover',objectPosition:'center top',borderRadius:16,display:'block',transform:'rotate(1deg) translateY(-10px)',boxShadow:'0 6px 24px rgba(0,0,0,0.10)'}}/>
+      <img src="uploads/IMG_2923.JPG" alt="auto" style={{width:'100%',height:190,objectFit:'cover',objectPosition:'center 30%',borderRadius:16,display:'block',transform:'rotate(2deg)',boxShadow:'0 6px 24px rgba(0,0,0,0.10)'}}/>
+    </div>
+
+    {/* TWO MODES — handwritten arrows pointing INTO photos */}
+    <div style={{marginBottom:48}}>
+      <h3 style={{fontFamily:'Lora,serif',fontSize:24,fontWeight:500,color:'#1a1a1a',marginBottom:28}}>dva módy. 😅</h3>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:32}}>
+        {/* Unconscious mode */}
+        <div>
+          <p style={{fontFamily:'Caveat,cursive',fontSize:21,color:'#1a1a1a',lineHeight:1.4,marginBottom:14}}>takto sa tvárim keď nežiješ vedome 😵</p>
+          {/* Arrow pointing UP into photos */}
+          <div style={{position:'relative'}}>
+            {/* Overlapping scattered photos */}
+            <div style={{position:'relative',height:230}}>
+              <img src="uploads/IMG_8209.JPG" alt="nevedome" style={{position:'absolute',left:0,top:0,width:'52%',height:210,objectFit:'cover',objectPosition:'center 20%',borderRadius:14,display:'block',transform:'rotate(-3deg)',boxShadow:'0 4px 20px rgba(0,0,0,0.12)'}}/>
+              <img src="uploads/IMG_8167.JPG" alt="nevedome2" style={{position:'absolute',right:0,top:16,width:'52%',height:210,objectFit:'cover',objectPosition:'center 55%',borderRadius:14,display:'block',transform:'rotate(2.5deg)',boxShadow:'0 4px 20px rgba(0,0,0,0.12)'}}/>
+              {/* SVG arrow starting from text area, pointing INTO left photo face */}
+              <svg style={{position:'absolute',top:10,left:'22%',zIndex:3,pointerEvents:'none'}} width="60" height="80" viewBox="0 0 60 80">
+                <defs><marker id="b1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,1 L9,5 L0,9 Z" fill="#1a1a1a"/></marker></defs>
+                <path d="M 50,75 Q 30,50 18,20" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round" markerEnd="url(#b1)"/>
+              </svg>
+              {/* SVG arrow pointing INTO right photo face */}
+              <svg style={{position:'absolute',top:24,right:'18%',zIndex:3,pointerEvents:'none'}} width="60" height="70" viewBox="0 0 60 70">
+                <defs><marker id="b2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,1 L9,5 L0,9 Z" fill="#1a1a1a"/></marker></defs>
+                <path d="M 10,68 Q 30,44 42,16" stroke="#1a1a1a" strokeWidth="2.5" fill="none" strokeLinecap="round" markerEnd="url(#b2)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        {/* Conscious mode */}
+        <div>
+          <p style={{fontFamily:'Caveat,cursive',fontSize:21,color:'#5a9a5e',lineHeight:1.4,marginBottom:14}}>takto keď žiješ podľa svojho vnútra 😌</p>
+          <div style={{position:'relative'}}>
+            <img src="uploads/IMG_8054.JPG" alt="vedome" style={{width:'100%',height:230,objectFit:'cover',objectPosition:'center 30%',borderRadius:16,display:'block',transform:'rotate(1.5deg)',boxShadow:'0 4px 20px rgba(0,0,0,0.12)'}}/>
+            {/* Arrow pointing into face */}
+            <svg style={{position:'absolute',bottom:20,right:20,zIndex:3,pointerEvents:'none'}} width="70" height="80" viewBox="0 0 70 80">
+              <defs><marker id="b3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,1 L9,5 L0,9 Z" fill="#5a9a5e"/></marker></defs>
+              <path d="M 60,72 Q 40,48 25,18" stroke="#5a9a5e" strokeWidth="2.5" fill="none" strokeLinecap="round" markerEnd="url(#b3)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Apple-style dark cards */}
+    <div style={{borderTop:'1px solid #ebebea',paddingTop:40,marginBottom:40}}>
+      <h3 style={{fontFamily:'Lora,serif',fontSize:18,fontWeight:500,color:'#aaa',marginBottom:20,letterSpacing:'0.02em'}}>kde ma nájdeš.</h3>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:12}}>
+        {[
+          {label:'myšlienky.',desc:'Reflexie z denníka',target:'myslienky',bg:'#1a1a1a'},
+          {label:'projekty. 🟠',desc:'Bitcoin + Substack',target:'projekty',bg:'#1a1a1a'},
+          {label:'cestovanie.',desc:'Kde som bol, kam idem',target:'cestovanie',bg:'#2a2a2a'},
+          {label:'máj. 🌸',desc:'Čo ma čaká tento mesiac',target:'maj',bg:'#2a2a2a'},
+        ].map((card,i)=>{
+          const[h,setH]=useState(false);
+          return(
+            <div key={i} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} onClick={()=>go(card.target)}
+              style={{background:card.bg,borderRadius:20,padding:'22px',cursor:'pointer',position:'relative',minHeight:100,display:'flex',flexDirection:'column',justifyContent:'flex-end',transform:h?'scale(1.02)':'scale(1)',transition:'transform 0.2s',boxShadow:h?'0 8px 30px rgba(0,0,0,0.22)':'0 2px 12px rgba(0,0,0,0.12)'}}>
+              <span style={{position:'absolute',top:16,right:18,fontSize:18,color:'rgba(255,255,255,0.4)'}}>↗</span>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginBottom:6,fontFamily:'Inter'}}>{card.desc}</div>
+              <div style={{fontFamily:'Lora,serif',fontSize:22,fontWeight:700,color:'#fff',lineHeight:1.1}}>{card.label}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+    <a href="mailto:dominik@dominikzazo.sk" style={{display:'inline-flex',alignItems:'center',gap:8,border:'1.5px solid #e0e0dc',borderRadius:99,padding:'10px 24px',fontSize:14,fontFamily:'Inter',color:'#444',textDecoration:'none'}}
+      onMouseEnter={e=>{e.currentTarget.style.background='#1a1a1a';e.currentTarget.style.color='#fff';e.currentTarget.style.borderColor='#1a1a1a'}}
+      onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='#444';e.currentTarget.style.borderColor='#e0e0dc'}}>
+      napíš mi →
+    </a>
+  </div>
+);
+
+/* ── BOTTOM SURPRISE ── */
+const BottomSurprise=()=>{
+  const[email,setEmail]=useState('');
+  const[sent,setSent]=useState(false);
+  const[hearts,setHearts]=useState([]);
+  const send=()=>{
+    if(!email.includes('@'))return;
+    setSent(true);
+    setHearts(Array.from({length:16},(_,i)=>({id:i,x:Math.random()*90+5,delay:Math.random()*1.2,e:['💗','💛','🌿','✨','🤍'][Math.floor(Math.random()*5)]})));
+  };
+  return(
+    <div style={{minHeight:'100vh',background:'#fafaf8',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'relative',overflow:'hidden',padding:'60px 32px'}}>
+      {hearts.map(h=>(
+        <span key={h.id} style={{position:'absolute',left:`${h.x}%`,bottom:'5%',fontSize:28,animation:`heartFloat 2.5s ${h.delay}s ease-out forwards`,pointerEvents:'none'}}>{h.e}</span>
+      ))}
+      <p style={{fontFamily:'Caveat,cursive',fontSize:18,color:'#ccc',marginBottom:8,letterSpacing:'0.04em'}}>psst... 🤫</p>
+      {!sent?(
+        <>
+          <h2 style={{fontFamily:'Caveat,cursive',fontSize:52,color:'#1a1a1a',marginBottom:8,textAlign:'center',lineHeight:1.1}}>Hľadáš viac mňa? 😄</h2>
+          <p style={{fontFamily:'Caveat,cursive',fontSize:28,color:'#888',marginBottom:48,textAlign:'center'}}>No dobre, ostanme v kontakte.</p>
+          <p style={{fontFamily:'Caveat,cursive',fontSize:18,color:'#bbb',marginBottom:12}}>nikomu ani muk 🤫</p>
+          <div style={{display:'flex',gap:10,maxWidth:440,width:'100%',flexWrap:'wrap',justifyContent:'center'}}>
+            <input type="email" placeholder="tvoj@email.sk" value={email} onChange={e=>setEmail(e.target.value)}
+              onKeyDown={e=>e.key==='Enter'&&send()}
+              style={{flex:1,minWidth:220,background:'#fff',border:'1.5px solid #e0e0dc',borderRadius:99,padding:'12px 20px',fontSize:16,fontFamily:'Caveat,cursive',color:'#1a1a1a',outline:'none'}}/>
+            <button onClick={send} style={{border:'none',borderRadius:99,padding:'12px 28px',fontSize:16,fontFamily:'Caveat,cursive',background:'#1a1a1a',color:'#fff',cursor:'pointer'}}>
+              odoslať 💗
+            </button>
+          </div>
+        </>
+      ):(
+        <>
+          <h2 style={{fontFamily:'Caveat,cursive',fontSize:52,color:'#1a1a1a',marginBottom:12,textAlign:'center',animation:'countPop 0.5s ease'}}>Ďakujem! 💗</h2>
+          <p style={{fontFamily:'Caveat,cursive',fontSize:24,color:'#888',textAlign:'center'}}>Teraz ostaneme v kontakte. Pomaly, ako to tu máme radi. 🌿</p>
+        </>
+      )}
+    </div>
+  );
+};
+
+/* ── FOOTER ── */
+const Footer=()=>(
+  <footer style={{textAlign:'center',padding:'28px 32px 44px',borderTop:'1px solid #ebebea',marginTop:40}}>
+    <span style={{fontSize:13,color:'#ccc',fontFamily:'Lora,serif',fontStyle:'italic'}}>○ Písané pomaly.</span>
+  </footer>
+);
+
+/* ── APP ── */
+const SECTIONS={home:Home,maj:Maj,myslienky:Myslienky,citam:Citam,cestovanie:Cestovanie,projekty:Projekty,'o-mne':OMne};
+
+function App(){
+  const[active,setActive]=useState('home');
+  const[transitioning,setTransitioning]=useState(false);
+  const[transTarget,setTransTarget]=useState(null);
+  const[tweaks,setTweaks]=useTweaks(TWEAK_DEFAULTS);
+  const mainRef=useRef();
+
+  const go=useCallback((target)=>{
+    if(target===active||transitioning)return;
+    setTransTarget(target);
+    setTransitioning(true);
+  },[active,transitioning]);
+
+  const finishTransition=()=>{
+    setActive(transTarget);
+    setTransitioning(false);
+    setTransTarget(null);
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+
+  const Section=SECTIONS[active]||Home;
+  return(
+    <>
+      {transitioning&&<CoffeeTrans target={transTarget} onDone={finishTransition}/>}
+      {/* Reveal panel — fixed under the page */}
+      <div style={{position:'fixed',bottom:0,left:0,right:0,height:'100vh',zIndex:0}}>
+        <BottomSurprise/>
+      </div>
+      {/* Main scrollable content — sits above reveal */}
+      <div style={{position:'relative',zIndex:1,background:'#fafaf8',display:'flex',flexDirection:'column',minHeight:'100vh'}}>
+        <Nav active={active} go={go}/>
+        <main ref={mainRef} style={{flex:1}}>
+          <Section go={go} tweaks={tweaks}/>
+        </main>
+        <Footer/>
+        {/* Scroll spacer to reveal bottom panel */}
+        <div style={{height:'100vh'}}/>
+      </div>
+      <TweaksPanel tweaks={tweaks} setTweaks={setTweaks}>
+        <TweakSection title="Farby"><TweakColor id="accentColor" label="Akcent"/></TweakSection>
+        <TweakSection title="Karty"><TweakSlider id="cardRadius" label="Zaoblenie" min={8} max={36} step={2}/></TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
