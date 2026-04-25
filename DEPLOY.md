@@ -1,0 +1,1 @@
+# dominikzazo.sk
