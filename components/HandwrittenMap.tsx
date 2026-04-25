@@ -1,8 +1,8 @@
 import type { MapCity } from '@/components/sections/Cestovanie'
 
 const mp = (lon: number, lat: number) => ({
-  x: ((lon + 30) / 95) * 880,
-  y: ((73 - lat) / 53) * 520,
+  x: Math.round(((lon + 30) / 95) * 880),
+  y: Math.round(((73 - lat) / 53) * 520),
 })
 
 const DOT_COLOR: Record<string, string> = {
@@ -14,6 +14,9 @@ const DOT_COLOR: Record<string, string> = {
 
 const pillWidth = (city: MapCity) => (city.emoji.length + city.name.length) * 6.8 + 22
 
+// Pre-computed coordinates for all land paths
+// Projection: x = ((lon+30)/95)*880, y = ((73-lat)/53)*520
+
 export default function HandwrittenMap({ onHover }: { onHover: (city: MapCity | null) => void }) {
   return (
     <svg
@@ -22,8 +25,8 @@ export default function HandwrittenMap({ onHover }: { onHover: (city: MapCity | 
     >
       <defs>
         <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.018 0.022" numOctaves={2} result="noise" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale={2.8} xChannelSelector="R" yChannelSelector="G" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.015 0.018" numOctaves={2} result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale={2.2} xChannelSelector="R" yChannelSelector="G" />
         </filter>
         <style>{`.mp:hover{opacity:.85;cursor:pointer}`}</style>
       </defs>
@@ -36,15 +39,130 @@ export default function HandwrittenMap({ onHover }: { onHover: (city: MapCity | 
         <line key={`h${i}`} x1="0" y1={i * 104} x2="880" y2={i * 104} stroke="#e8e2d8" strokeWidth="0.5" />
       ))}
 
-      {/* Landmasses */}
-      <g filter="url(#rough)" stroke="#a89880" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" fill="#ede6d4">
-        <path d="M194,304 L194,354 L228,366 L262,356 L244,246 L298,218 L324,198 L371,144 L407,170 L433,144 L491,79 L601,45 L645,54 L667,176 L714,180 L730,208 L666,292 L547,318 L483,357 L464,329 L428,306 L426,356 L405,348 L362,295 L344,293 C310,306 289,356 228,366 Z" />
-        <path d="M0,440 L160,432 L280,436 L400,430 L520,434 L640,428 L760,432 L880,426 L880,520 L0,520 Z" fill="#e0d8c4" />
-        <path d="M242,222 L255,212 L277,220 L284,234 L278,250 L262,254 L246,244 Z" />
-        <path d="M242,222 L255,210 L260,196 L270,183 L279,191 L280,210 L263,218 Z" />
-        <path d="M228,226 L240,220 L242,234 L235,242 L224,237 Z" />
-        <path d="M198,116 L217,110 L234,116 L232,130 L215,134 L198,124 Z" />
-        <circle cx="127" cy="440" r="9" />
+      <g filter="url(#rough)" stroke="#a89880" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round" fill="#ede6d4">
+
+        {/* ── MAINLAND EUROPE ── */}
+        {/* Pyrenees/Basque → Bay of Biscay → Brittany → Channel → Netherlands →
+            Germany → Poland coast → Baltic states → Russia → Ukraine → Black Sea →
+            Bulgaria → Greece → Adriatic coast → N Italy → French Riviera → back */}
+        <path d="
+          M 266,280
+          Q 260,267 266,257
+          Q 252,244 236,234
+          Q 249,221 270,215
+          L 293,209 L 310,205 L 322,187 L 354,176
+          L 408,181 L 462,175 L 499,132
+          Q 527,130 554,127
+          Q 573,163 573,205
+          L 630,224 L 636,253
+          Q 598,268 554,270
+          L 536,290 L 536,312
+          Q 522,312 508,313
+          Q 508,342 481,357
+          Q 469,347 462,330
+          L 450,318 L 448,300 L 426,291
+          Q 415,278 402,268
+          Q 386,268 360,281
+          Q 337,280 307,280
+          Q 290,280 266,280 Z
+        " />
+
+        {/* ── IBERIAN PENINSULA ── */}
+        <path d="
+          M 307,280
+          Q 252,280 194,289
+          L 191,352
+          Q 205,358 222,357
+          Q 227,362 231,362
+          Q 255,352 278,342
+          Q 283,328 305,288
+          L 307,280 Z
+        " />
+
+        {/* ── ITALIAN BOOT ── */}
+        <path d="
+          M 322,280
+          Q 340,278 359,281
+          Q 371,280 381,295
+          Q 393,308 408,328
+          L 421,340
+          L 426,334 L 444,326 L 448,322
+          Q 437,308 426,291
+          Q 412,276 394,270
+          Q 392,268 390,268
+          Q 401,268 402,268
+          Q 386,275 362,280
+          L 322,280 Z
+        " />
+
+        {/* ── SCANDINAVIA + DENMARK + FINLAND ── */}
+        <path d="
+          M 354,176
+          Q 356,162 361,143
+          Q 378,155 399,170
+          L 444,152
+          Q 470,136 499,127
+          Q 508,103 508,79
+          Q 521,54 536,29
+          Q 496,28 452,31
+          Q 424,44 408,51
+          Q 383,91 340,100
+          Q 326,116 322,127
+          Q 326,134 333,137
+          Q 345,154 354,176 Z
+        " />
+
+        {/* ── GREAT BRITAIN ── */}
+        <path d="
+          M 231,225
+          Q 261,210 292,209
+          Q 280,196 270,162
+          Q 252,148 231,147
+          Q 222,168 231,196
+          Q 231,211 231,225 Z
+        " />
+
+        {/* ── IRELAND ── */}
+        <path d="
+          M 185,210
+          Q 203,210 213,196
+          Q 204,181 185,181
+          Q 180,196 185,210 Z
+        " />
+
+        {/* ── TURKEY + CAUCASUS ── */}
+        <path d="
+          M 545,313
+          Q 580,299 636,295
+          L 666,295 L 720,293
+          Q 710,318 693,337
+          L 675,352
+          Q 638,360 600,362
+          Q 560,357 544,357
+          Q 530,343 517,343
+          Q 526,326 536,312
+          L 545,313 Z
+        " />
+
+        {/* ── N AFRICA EDGE (bottom of map) ── */}
+        <path d="
+          M 0,460 Q 140,452 220,455 Q 360,448 480,452
+          Q 600,446 720,450 L 880,446 L 880,520 L 0,520 Z
+        " fill="#e5dece" stroke="none" />
+
+        {/* Canary Islands region (tiny dots) */}
+        <circle cx="127" cy="438" r="5" />
+        <circle cx="108" cy="444" r="3.5" />
+
+        {/* Corsica */}
+        <ellipse cx="340" cy="306" rx="7" ry="12" transform="rotate(-20 340 306)" />
+        {/* Sardinia */}
+        <ellipse cx="336" cy="326" rx="8" ry="14" transform="rotate(-15 336 326)" />
+        {/* Sicily */}
+        <ellipse cx="393" cy="336" rx="14" ry="8" transform="rotate(-10 393 336)" />
+        {/* Crete */}
+        <ellipse cx="480" cy="370" rx="18" ry="5" transform="rotate(-5 480 370)" />
+
       </g>
 
       {/* City dots + pills */}

@@ -29,14 +29,14 @@ export default function Nav({ active, go }: NavProps) {
 
   return (
     <nav
-      className="nav-scroll fixed top-3 left-1/2 -translate-x-1/2 z-[200] flex gap-0.5 rounded-full border border-black/[0.07] py-[5px] px-[6px] shadow-[0_4px_24px_rgba(0,0,0,0.08)] transition-[background] duration-300"
+      className="nav-scroll fixed top-3 left-1/2 -translate-x-1/2 z-[200] flex gap-0.5 border border-black/[0.07] py-[5px] px-[6px] shadow-[0_4px_24px_rgba(0,0,0,0.08)] transition-[background] duration-300"
       style={{
         background: scrolled ? 'rgba(250,250,248,0.92)' : 'rgba(250,250,248,0.7)',
         backdropFilter: 'blur(14px)',
         maxWidth: 'calc(100vw - 24px)',
-        overflowX: 'auto',
-        flexWrap: 'nowrap',
-        flexShrink: 0,
+        borderRadius: 24,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
       }}
     >
       {NAV_ITEMS.map(item => (

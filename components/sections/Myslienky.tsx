@@ -87,7 +87,7 @@ export default function Myslienky({ go: _ }: { go: (id: SectionId) => void }) {
   useEffect(() => {
     fetch('/api/substack')
       .then(r => r.json())
-      .then(d => { if (d.items) setPosts(d.items.slice(0, 4)) })
+      .then(d => { if (d.items) setPosts(d.items) })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])

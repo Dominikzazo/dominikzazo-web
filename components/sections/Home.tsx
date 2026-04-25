@@ -19,8 +19,8 @@ export default function Home({ go }: { go: (id: SectionId) => void }) {
   useEffect(() => {
     const f = () => {
       const y = window.scrollY
-      if (ref1.current) ref1.current.style.transform = `translateY(${y * 0.12}px)`
-      if (ref2.current) ref2.current.style.transform = `translateY(${-y * 0.10}px)`
+      if (ref1.current) ref1.current.style.transform = `translate(${y * 0.04}px, ${y * 0.07}px)`
+      if (ref2.current) ref2.current.style.transform = `translate(${-y * 0.05}px, ${-y * 0.06}px)`
     }
     window.addEventListener('scroll', f, { passive: true })
     return () => window.removeEventListener('scroll', f)
