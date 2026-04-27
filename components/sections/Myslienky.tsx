@@ -4,97 +4,90 @@ import Card from '@/components/ui/Card'
 import Tag from '@/components/ui/Tag'
 import type { SectionId } from '@/app/page'
 
-interface Thought {
-  slug?: string
-  date?: string
-  pubDate?: string
+interface Post {
   title: string
-  tags?: string[]
-  preview?: string
-  body?: string
-  description?: string
-  link?: string
-  isSubstack?: boolean
+  link: string
+  pubDate: string
+  preview: string
+  content: string
+  cover: string | null
 }
 
-const LOCAL_THOUGHTS: Thought[] = [
-  {
-    slug: 'vlaky', date: '12. apríla 2025',
-    title: 'Prečo milujem vlaky 🚄',
-    tags: ['cestovanie', 'pomalý život'],
-    preview: 'Vlak ťa donúti sedieť a nič nerobiť. A to je presne to, čo potrebuješ.',
-    body: 'Vlak ťa donúti sedieť a nič nerobiť. A to je presne to, čo potrebuješ.\n\nKeď cestujem autom alebo lietadlom, som v pohybe, ale nie naozaj prítomný. Vo vlaku si uvedomíš, že krajina plynie okolo a ty si len tam.\n\nPovažan som za vlakového nájomníka. Rýchlik Bratislava, Považan. Soundtrack dňa. 🚄',
-  },
-  {
-    slug: 'rano', date: '24. apríla 2025',
-    title: 'O rannom písaní',
-    tags: ['žurnálovanie', 'rutina'],
-    preview: 'Každé ráno päť minút. Bez tlaku, bez cieľa. Len pero a papier.',
-    body: 'Každé ráno päť minút. Bez tlaku, bez cieľa.\n\nDlho som si myslel, že žurnálovanie je pre ľudí, ktorí majú čo povedať. Ja som mal len chaos.\n\nA práve preto to fungovalo. Chaos sa na papieri stáva čitateľným.\n\nPäť minút. Každý deň. To je všetko.',
-  },
-  {
-    slug: 'ticho', date: '18. apríla 2025',
-    title: 'Ticho v meste',
-    tags: ['ticho', 'mestský život'],
-    preview: 'Myslel som si, že ticho nájdem len v prírode. Mýlil som sa.',
-    body: 'Myslel som si, že ticho nájdem len v prírode. Mýlil som sa.\n\nTicho nie je o absencii zvuku. Je to o prítomnosti. O tom, byť naozaj tam, kde si.\n\nAj uprostred mesta môžeš byť v tichu, ak si ho vybereš.',
-  },
-]
+const formatDate = (s: string) => {
+  if (!s) return ''
+  const d = new Date(s)
+  if (isNaN(d.getTime())) return s
+  return d.toLocaleDateString('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' })
+}
 
-function ThoughtDetail({ t, onBack }: { t: Thought; onBack: () => void }) {
+function PostDetail({ post, onBack }: { post: Post; onBack: () => void }) {
   return (
-    <div className="page-enter" style={{ maxWidth: 660, margin: '0 auto', padding: '120px 32px 80px' }}>
+    <div className="page-enter" style={{ maxWidth: 720, margin: '0 auto', padding: '110px 20px 80px' }}>
       <button
         onClick={onBack}
-        style={{ border: 'none', background: 'transparent', color: '#aaa', fontSize: 13, cursor: 'pointer', marginBottom: 48, fontFamily: 'var(--font-inter), sans-serif', padding: 0 }}
+        style={{ border: 'none', background: 'transparent', color: '#aaa', fontSize: 13, cursor: 'pointer', marginBottom: 32, fontFamily: 'var(--font-inter), sans-serif', padding: 0 }}
       >
-        ← späť
+        ← späť na všetky myšlienky
       </button>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        {(t.tags ?? []).map(tg => <Tag key={tg}>{tg}</Tag>)}
-        {t.isSubstack && <Tag bg="#ff6719" color="#fff">substack</Tag>}
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <Tag bg="#ff6719" color="#fff">substack</Tag>
+        <span style={{ fontSize: 13, color: '#bbb', fontFamily: 'var(--font-inter), sans-serif' }}>
+          {formatDate(post.pubDate)}
+        </span>
       </div>
-      <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 34, fontWeight: 500, color: '#1a1a1a', marginBottom: 12, lineHeight: 1.25 }}>
-        {t.title}.
-      </h2>
-      <div style={{ color: '#bbb', fontSize: 13, marginBottom: 48, fontFamily: 'var(--font-inter), sans-serif' }}>
-        {t.date ?? (t.pubDate ? new Date(t.pubDate).toLocaleDateString('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' }) : '')}
-      </div>
-      {(t.body ?? t.description ?? '').split('\n\n').map((p, i) => (
-        <p key={i} style={{ fontSize: 18, color: '#444', lineHeight: 1.85, marginBottom: 28, fontFamily: 'var(--font-lora), serif' }}>
-          {p.replace(/<[^>]*>/g, '')}
-        </p>
-      ))}
-      {t.link && (
-        <a
-          href={t.link}
-          target="_blank"
-          rel="noreferrer"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, border: '1.5px solid #e0e0dc', borderRadius: 99, padding: '10px 22px', fontSize: 14, fontFamily: 'var(--font-inter), sans-serif', color: '#444', textDecoration: 'none' }}
-        >
-          Čítaj na Substack ↗
-        </a>
+
+      <h1 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 36, fontWeight: 500, color: '#1a1a1a', marginBottom: 32, lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+        {post.title}
+      </h1>
+
+      {post.cover && (
+        <img
+          src={post.cover}
+          alt={post.title}
+          style={{ width: '100%', height: 'auto', borderRadius: 18, marginBottom: 36, display: 'block', boxShadow: '0 6px 32px rgba(0,0,0,0.10)' }}
+        />
+      )}
+
+      <div className="article-content" dangerouslySetInnerHTML={{ __html: post.content }} />
+
+      {post.link && (
+        <div style={{ marginTop: 56, paddingTop: 32, borderTop: '1px solid #ebebea', display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
+          <p style={{ fontSize: 14, color: '#888', fontFamily: 'var(--font-lora), serif', fontStyle: 'italic' }}>
+            Páči sa ti? Pokračuj na Substacku, kde sa dá komentovať a sledovať. 🧡
+          </p>
+          <a
+            href={post.link}
+            target="_blank"
+            rel="noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#ff6719', borderRadius: 99, padding: '12px 26px', fontSize: 14, fontFamily: 'var(--font-inter), sans-serif', color: '#fff', textDecoration: 'none', fontWeight: 500 }}
+          >
+            ✍️ Otvoriť na Substack ↗
+          </a>
+        </div>
       )}
     </div>
   )
 }
 
 export default function Myslienky({ go: _ }: { go: (id: SectionId) => void }) {
-  const [sel, setSel] = useState<Thought | null>(null)
-  const [posts, setPosts] = useState<Thought[]>([])
+  const [sel, setSel] = useState<Post | null>(null)
+  const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     fetch('/api/substack')
       .then(r => r.json())
-      .then(d => { if (d.items) setPosts(d.items) })
-      .catch(() => {})
+      .then(d => {
+        if (d.items && Array.isArray(d.items)) setPosts(d.items)
+        else setError(true)
+      })
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [])
 
-  if (sel) return <ThoughtDetail t={sel} onBack={() => setSel(null)} />
-
-  const all = [...LOCAL_THOUGHTS, ...posts.map(p => ({ ...p, isSubstack: true }))]
+  if (sel) return <PostDetail post={sel} onBack={() => setSel(null)} />
 
   return (
     <div className="page-enter page-pad" style={{ maxWidth: 760, margin: '0 auto' }}>
@@ -102,46 +95,67 @@ export default function Myslienky({ go: _ }: { go: (id: SectionId) => void }) {
         myšlienky.
       </h2>
       <p style={{ color: '#aaa', fontSize: 15, marginBottom: 56, fontFamily: 'var(--font-inter), sans-serif' }}>
-        Reflexie z denníka. Veci zo Substacku. Záznamy, ktoré stoja za to.
+        Reflexie zo Substacku. Pomaly. Zámerne. Ľudsky. ✍️
       </p>
 
+      {loading && (
+        <div style={{ textAlign: 'center', padding: 48, color: '#bbb', fontSize: 14, fontFamily: 'var(--font-lora), serif', fontStyle: 'italic' }}>
+          načítavam zo Substacku... ☕
+        </div>
+      )}
+
+      {!loading && error && (
+        <div style={{ textAlign: 'center', padding: 48, color: '#aaa', fontSize: 14 }}>
+          Nepodarilo sa načítať články. <a href="https://dominikzazo.substack.com" target="_blank" rel="noreferrer" style={{ color: '#ff6719' }}>Pozri priamo na Substacku ↗</a>
+        </div>
+      )}
+
+      {!loading && !error && posts.length === 0 && (
+        <div style={{ textAlign: 'center', padding: 48, color: '#aaa', fontSize: 14 }}>
+          Zatiaľ tu nič nie je. Čoskoro sa to zmení. 🌱
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {all.map((t, i) => (
-          <Card key={i} onClick={() => setSel(t)} style={{ padding: '24px 28px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                {(t.tags ?? []).map(tg => <Tag key={tg}>{tg}</Tag>)}
-                {t.isSubstack && <Tag bg="#ff6719" color="#fff">substack</Tag>}
+        {posts.map((p, i) => (
+          <Card key={i} onClick={() => setSel(p)} style={{ padding: 0, overflow: 'hidden' }}>
+            {p.cover && (
+              <img
+                src={p.cover}
+                alt={p.title}
+                style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }}
+              />
+            )}
+            <div style={{ padding: '22px 26px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                <Tag bg="#ff6719" color="#fff">substack</Tag>
+                <span style={{ fontSize: 12, color: '#ccc', fontFamily: 'var(--font-inter), sans-serif' }}>
+                  {formatDate(p.pubDate)}
+                </span>
               </div>
-              <span style={{ fontSize: 12, color: '#ccc', fontFamily: 'var(--font-inter), sans-serif' }}>
-                {t.date ?? (t.pubDate ? new Date(t.pubDate).toLocaleDateString('sk-SK', { day: 'numeric', month: 'long', year: 'numeric' }) : '')}
-              </span>
+              <h3 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 22, fontWeight: 600, color: '#1a1a1a', marginBottom: 8, lineHeight: 1.3 }}>
+                {p.title}
+              </h3>
+              <p style={{ fontSize: 14, color: '#888', lineHeight: 1.7 }}>
+                {p.preview}{p.preview.length >= 180 ? '...' : ''}
+              </p>
             </div>
-            <h3 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 21, fontWeight: 600, color: '#1a1a1a', marginBottom: 7, lineHeight: 1.3 }}>
-              {t.title}
-            </h3>
-            <p style={{ fontSize: 14, color: '#888', lineHeight: 1.7 }}>
-              {t.preview ?? (t.description?.replace(/<[^>]*>/g, '').slice(0, 120) + '...')}
-            </p>
           </Card>
         ))}
-        {loading && (
-          <div style={{ textAlign: 'center', padding: 32, color: '#ccc', fontSize: 13 }}>
-            načítavam Substack... ☕
-          </div>
-        )}
       </div>
 
-      <div style={{ marginTop: 40, textAlign: 'center' }}>
-        <a
-          href="https://dominikzazo.substack.com"
-          target="_blank"
-          rel="noreferrer"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, border: '1.5px solid #e0e0dc', borderRadius: 99, padding: '10px 24px', fontSize: 14, fontFamily: 'var(--font-inter), sans-serif', color: '#444', textDecoration: 'none' }}
-        >
-          všetky články na Substack ↗
-        </a>
-      </div>
+      {!loading && posts.length > 0 && (
+        <div style={{ marginTop: 40, textAlign: 'center' }}>
+          <a
+            href="https://dominikzazo.substack.com"
+            target="_blank"
+            rel="noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, border: '1.5px solid #e0e0dc', borderRadius: 99, padding: '10px 24px', fontSize: 14, fontFamily: 'var(--font-inter), sans-serif', color: '#444', textDecoration: 'none' }}
+          >
+            všetky články na Substack ↗
+          </a>
+        </div>
+      )}
     </div>
   )
 }

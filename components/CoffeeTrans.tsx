@@ -37,7 +37,7 @@ export default function CoffeeTrans({ onDone }: { onDone: () => void }) {
       className="fixed inset-0 z-[999] flex flex-col items-center justify-center page-enter"
       style={{ background: '#fafaf8', padding: '0 32px' }}
     >
-      <svg width="88" height="96" viewBox="-4 -12 92 104" style={{ marginBottom: 32 }}>
+      <svg width="88" height="96" viewBox="-9 -12 100 108" style={{ marginBottom: 32 }}>
         {[22, 36, 50].map((x, i) => (
           <path
             key={x}
@@ -55,12 +55,14 @@ export default function CoffeeTrans({ onDone }: { onDone: () => void }) {
         <path d="M13,44 Q36,52 59,44" stroke="#c9a96e" strokeWidth="3" fill="none" strokeLinecap="round" />
       </svg>
 
-      <div
-        key={count}
-        className="animate-count-pop"
-        style={{ fontFamily: 'var(--font-caveat), cursive', fontSize: 42, color: '#1a1a1a', fontWeight: 700, marginBottom: 24 }}
-      >
-        {count}
+      <div style={{ width: 80, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+        <span
+          key={count}
+          className="animate-count-pop"
+          style={{ fontFamily: 'var(--font-caveat), cursive', fontSize: 42, color: '#1a1a1a', fontWeight: 700, display: 'inline-block', lineHeight: 1 }}
+        >
+          {count}
+        </span>
       </div>
 
       <p style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: '#555', textAlign: 'center', maxWidth: 420, lineHeight: 1.7, marginBottom: 8 }}>

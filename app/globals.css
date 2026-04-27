@@ -65,6 +65,54 @@
 .nav-scroll { scrollbar-width: none; -ms-overflow-style: none; }
 .nav-scroll::-webkit-scrollbar { display: none; }
 
+/* ── Nav: 2-row grid on mobile, flex pill on desktop ── */
+@media (max-width: 639px) {
+  .nav-pill {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 3px !important;
+    width: calc(100vw - 16px) !important;
+    padding: 4px 4px !important;
+  }
+  .nav-pill > button,
+  .nav-pill > a {
+    padding: 6px 2px !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    text-align: center;
+    justify-content: center;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ── Substack article content (HTML rendered) ── */
+.article-content { font-family: var(--font-lora), serif; color: #444; }
+.article-content p { font-size: 17px; line-height: 1.85; margin-bottom: 24px; }
+.article-content h1, .article-content h2, .article-content h3 {
+  font-family: var(--font-lora), serif; color: #1a1a1a; margin: 32px 0 16px; line-height: 1.3;
+}
+.article-content h1 { font-size: 28px; font-weight: 600; }
+.article-content h2 { font-size: 22px; font-weight: 600; }
+.article-content h3 { font-size: 18px; font-weight: 600; }
+.article-content img {
+  max-width: 100%; height: auto; border-radius: 14px; margin: 24px auto; display: block;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.article-content a { color: #ff6719; text-decoration: underline; text-decoration-color: rgba(255,103,25,0.3); }
+.article-content blockquote {
+  border-left: 3px solid #c9a96e; padding: 4px 0 4px 20px; margin: 28px 0;
+  color: #666; font-style: italic;
+}
+.article-content ul, .article-content ol { padding-left: 24px; margin-bottom: 24px; }
+.article-content li { font-size: 17px; line-height: 1.8; margin-bottom: 8px; }
+.article-content strong { color: #1a1a1a; font-weight: 600; }
+.article-content em { font-style: italic; }
+.article-content figure { margin: 24px 0; }
+.article-content figcaption { font-size: 13px; color: #999; text-align: center; margin-top: 8px; font-style: italic; }
+.article-content hr { border: none; border-top: 1px solid #ebebea; margin: 40px auto; max-width: 80px; }
+
 /* ── Responsive section padding ── */
 .page-pad { padding: 96px 16px 56px; }
 @media (min-width: 640px)  { .page-pad { padding: 110px 24px 72px; } }
