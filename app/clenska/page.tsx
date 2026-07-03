@@ -35,7 +35,7 @@ export default async function ClenskaLanding() {
 
       {/* premium hero panel */}
       <section
-        className="relative w-full max-w-3xl overflow-hidden rounded-[28px] border border-[#c9a96e]/25 px-6 py-14 sm:px-14 sm:py-16 text-center"
+        className="kruh-grain relative w-full max-w-3xl overflow-hidden rounded-[28px] border border-[#c9a96e]/25 px-6 py-14 sm:px-14 sm:py-16 text-center"
         style={{
           background:
             'radial-gradient(120% 120% at 50% 0%, #23211c 0%, #1a1a1a 55%, #141414 100%)',
@@ -48,6 +48,18 @@ export default async function ClenskaLanding() {
           className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-56 w-56 rounded-full opacity-40 blur-3xl"
           style={{ background: 'radial-gradient(circle, #c9a96e 0%, transparent 70%)' }}
         />
+
+        {/* wax-seal monogram */}
+        <div
+          className="kruh-seal relative mx-auto mb-7 flex h-16 w-16 items-center justify-center rounded-full"
+          style={{
+            background: 'radial-gradient(circle at 35% 30%, #e8d3a0, #c9a96e 55%, #a8843f)',
+            boxShadow:
+              'inset 0 2px 5px rgba(255,255,255,0.45), inset 0 -4px 8px rgba(0,0,0,0.28), 0 6px 18px rgba(201,169,110,0.4)',
+          }}
+        >
+          <span className="font-lora text-[26px] leading-none" style={{ color: '#3a2e14' }}>K</span>
+        </div>
 
         <p
           className="relative text-[11px] font-medium tracking-[0.28em] uppercase mb-6"
@@ -77,7 +89,7 @@ export default async function ClenskaLanding() {
           {member.isAuthed ? (
             <Link
               href="/clenska/obsah"
-              className="inline-flex items-center gap-2 rounded-full px-8 py-[13px] text-[14.5px] font-medium no-underline transition-transform hover:-translate-y-0.5"
+              className="kruh-cta inline-flex items-center gap-2 rounded-full px-8 py-[13px] text-[14.5px] font-medium no-underline"
               style={{ background: '#c9a96e', color: '#1a1a1a' }}
             >
               Vstúpiť do obsahu →
@@ -86,7 +98,7 @@ export default async function ClenskaLanding() {
             <>
               <Link
                 href="/sign-up"
-                className="inline-flex items-center gap-2 rounded-full px-8 py-[13px] text-[14.5px] font-medium no-underline transition-transform hover:-translate-y-0.5"
+                className="kruh-cta inline-flex items-center gap-2 rounded-full px-8 py-[13px] text-[14.5px] font-medium no-underline"
                 style={{ background: '#c9a96e', color: '#1a1a1a' }}
               >
                 Zaregistruj sa zadarmo
@@ -109,16 +121,23 @@ export default async function ClenskaLanding() {
         </p>
       </section>
 
+      {/* gold hairline */}
+      <hr className="kruh-hairline w-full max-w-3xl mt-12" />
+
       {/* perks */}
-      <section className="w-full max-w-3xl mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <section className="w-full max-w-3xl mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
         {PERKS.map((p) => (
           <div
             key={p.t}
-            className="rounded-2xl border border-black/[0.07] bg-white/60 px-5 py-6"
+            className="kruh-perk rounded-2xl border border-black/[0.07] bg-white/70 px-5 py-6"
           >
             <div
-              className="mb-3 flex h-7 w-7 items-center justify-center rounded-full text-[13px]"
-              style={{ background: 'rgba(201,169,110,0.15)', color: '#a8843f' }}
+              className="mb-3 flex h-8 w-8 items-center justify-center rounded-full text-[13px]"
+              style={{
+                background: 'radial-gradient(circle at 35% 30%, #e8d3a0, #c9a96e 60%, #a8843f)',
+                color: '#3a2e14',
+                boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.5), inset 0 -2px 4px rgba(0,0,0,0.2)',
+              }}
             >
               ✦
             </div>

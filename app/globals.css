@@ -176,3 +176,64 @@
   border-radius: 99px;
   transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
 }
+
+/* ─────────────────────────────────────────────
+   Kruh (členská) — premium vrstva
+   ───────────────────────────────────────────── */
+
+/* jemný filmový grain (overlay cez ::before) */
+.kruh-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* gold hairline */
+.kruh-hairline {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgba(201,169,110,0.55), transparent);
+}
+
+/* wax-seal monogram — jemné plávanie */
+@keyframes kruhSealFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.kruh-seal { animation: kruhSealFloat 4.5s ease-in-out infinite; }
+
+/* locked shimmer (pre „čoskoro" prvky) */
+@keyframes kruhShimmer { 0% { background-position: -180% 0; } 100% { background-position: 180% 0; } }
+.kruh-shimmer {
+  background-image: linear-gradient(100deg, transparent 25%, rgba(201,169,110,0.30) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: kruhShimmer 2.8s ease-in-out infinite;
+}
+
+/* perk karta — hover lift + gold glow */
+.kruh-perk { transition: transform .3s cubic-bezier(.16,1,.3,1), border-color .3s, box-shadow .3s, background .3s; }
+.kruh-perk:hover {
+  transform: translateY(-3px);
+  border-color: rgba(201,169,110,0.5);
+  box-shadow: 0 14px 34px rgba(201,169,110,0.14);
+}
+
+/* esej — hover gold accent bar + posun */
+.kruh-essay { position: relative; transition: padding-left .3s cubic-bezier(.16,1,.3,1); }
+.kruh-essay::before {
+  content: '';
+  position: absolute; left: 0; top: 50%;
+  width: 2px; height: 0;
+  transform: translateY(-50%);
+  background: #c9a96e; border-radius: 2px;
+  transition: height .3s cubic-bezier(.16,1,.3,1);
+}
+.kruh-essay:hover { padding-left: 16px; }
+.kruh-essay:hover::before { height: 66%; }
+.kruh-essay-title { transition: color .2s ease; }
+.kruh-essay:hover .kruh-essay-title { color: #a8843f; }
+
+/* CTA — gold glow na hover */
+.kruh-cta { transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s; }
+.kruh-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(201,169,110,0.4); }
