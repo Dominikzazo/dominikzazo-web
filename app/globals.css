@@ -237,3 +237,8 @@
 /* CTA — gold glow na hover */
 .kruh-cta { transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s; }
 .kruh-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(201,169,110,0.4); }
+
+/* Homepage bento — jemný "dýchací" float (ohraničený ±5px, nerozhadzuje layout) */
+@keyframes bentoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.bento-float { animation: bentoFloat 7s ease-in-out infinite; will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .bento-float { animation: none; } }

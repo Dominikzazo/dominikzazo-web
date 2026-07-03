@@ -1,5 +1,4 @@
 'use client'
-import { useRef, useEffect } from 'react'
 import Tag from '@/components/ui/Tag'
 import type { SectionId } from '@/app/page'
 
@@ -13,17 +12,8 @@ const BENTO = [
 ]
 
 export default function Home({ go }: { go: (id: SectionId) => void }) {
-  const ref1 = useRef<HTMLDivElement>(null)
-  const ref2 = useRef<HTMLDivElement>(null)
-
-  // Parallax dočasne VYPNUTÝ — pri väčšom scrolle posúval bento karty mimo
-  // mriežky a rozhadzoval layout. TODO: vrátiť jemnejšiu verziu s clampom
-  // (malý koeficient + Math.min limit), nech to len jemne "dýcha".
-  useEffect(() => {
-    if (ref1.current) ref1.current.style.transform = ''
-    if (ref2.current) ref2.current.style.transform = ''
-  }, [])
-
+  // Jemný, ohraničený "dýchací" float na dvoch foto kartách (CSS, ±5px).
+  // Nahradil pôvodný scroll-parallax, ktorý pri väčšom scrolle rozhadzoval layout.
   return (
     <div className="page-enter page-pad" style={{ maxWidth: 1060, margin: '0 auto' }}>
       <div className="home-split">
@@ -77,8 +67,8 @@ export default function Home({ go }: { go: (id: SectionId) => void }) {
           {BENTO.map((e, i) => (
             <div
               key={i}
-              ref={i === 0 ? ref1 : i === 4 ? ref2 : undefined}
-              style={{ background: '#fff', borderRadius: 22, boxShadow: '0 2px 16px rgba(0,0,0,0.05)', overflow: 'hidden', padding: e.type === 'photo' ? 0 : 20 }}
+              className={i === 0 || i === 4 ? 'bento-float' : undefined}
+              style={{ background: '#fff', borderRadius: 22, boxShadow: '0 2px 16px rgba(0,0,0,0.05)', overflow: 'hidden', padding: e.type === 'photo' ? 0 : 20, animationDelay: i === 4 ? '-3.5s' : undefined }}
             >
               {e.type === 'photo' && (
                 <img src={e.src} alt={e.label} style={{ width: '100%', height: 'auto', display: 'block' }} />
