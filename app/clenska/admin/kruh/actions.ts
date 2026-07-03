@@ -53,6 +53,22 @@ export async function addItem(formData: FormData) {
   revalidate()
 }
 
+// Volané z client upload komponentu po dokončení uploadu do Blobu
+export async function createFileItem(data: {
+  categoryId: string
+  title: string
+  excerpt: string
+  mediaKey: string
+  fileName: string
+  mediaSize: number
+  published: boolean
+}) {
+  await requireAdmin()
+  if (!data.title || !data.categoryId || !data.mediaKey) return
+  await upsertItem({ ...data, type: 'file' })
+  revalidate()
+}
+
 export async function removeItem(formData: FormData) {
   await requireAdmin()
   const id = String(formData.get('id') ?? '')

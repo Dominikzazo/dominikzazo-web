@@ -1,30 +1,22 @@
 'use client'
 import { useState } from 'react'
 import Card from '@/components/ui/Card'
-import HandwrittenMap, { MAP_CITIES_SVG, DOT_COLOR } from '@/components/HandwrittenMap'
+import HandwrittenMap, { DOT_COLOR } from '@/components/HandwrittenMap'
 import type { SectionId } from '@/app/page'
+import type { Place } from '@/lib/cms/types'
 
-export interface MapCity {
-  name: string
-  lon: number
-  lat: number
-  status: 'home' | 'visited' | 'last' | 'wishlist'
-  emoji: string
-  note: string
-}
-
-const ALL_PLACES: MapCity[] = [
-  ...MAP_CITIES_SVG,
-  { name: 'Tokio', lon: 139.7, lat: 35.7, status: 'wishlist', emoji: '🍜', note: 'Dlhodobý sen. Vlaky tam musia byť fenomenálne.' },
-]
+// Spätná kompatibilita typu pre HandwrittenMap
+export type MapCity = Pick<Place, 'name' | 'lon' | 'lat' | 'status' | 'emoji' | 'note'>
 
 type Filter = 'all' | 'visited' | 'last' | 'wishlist'
 
-export default function Cestovanie({ go: _ }: { go: (id: SectionId) => void }) {
+export default function Cestovanie({ go: _, places }: { go: (id: SectionId) => void; places: Place[] }) {
   const [hov, setHov] = useState<MapCity | null>(null)
   const [filter, setFilter] = useState<Filter>('all')
 
-  const filtered = filter === 'all' ? ALL_PLACES : ALL_PLACES.filter(p => p.status === filter)
+  const onMapCities = places.filter(p => p.onMap)
+  const offMap = places.filter(p => !p.onMap)
+  const filtered = filter === 'all' ? places : places.filter(p => p.status === filter)
 
   return (
     <div className="page-enter page-pad" style={{ maxWidth: 1000, margin: '0 auto' }}>
@@ -36,7 +28,7 @@ export default function Cestovanie({ go: _ }: { go: (id: SectionId) => void }) {
       </p>
 
       <div className="map-scroll">
-        <HandwrittenMap onHover={setHov} />
+        <HandwrittenMap onHover={setHov} cities={onMapCities} />
       </div>
 
       {hov && (
@@ -57,12 +49,14 @@ export default function Cestovanie({ go: _ }: { go: (id: SectionId) => void }) {
         </div>
       )}
 
-      <div style={{ marginTop: 14, padding: '14px 20px', background: '#fff8ee', borderRadius: 16, border: '1.5px dashed #c9a96e', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
-        <span style={{ fontSize: 20 }}>🍜</span>
-        <span style={{ fontSize: 13, color: '#888' }}>
-          <strong style={{ color: '#1a1a1a' }}>Tokio</strong> je na mape mimo záber, ale na mojom zozname číslo 1. Vlaky tam musia byť fenomenálne.
-        </span>
-      </div>
+      {offMap.map(p => (
+        <div key={p.id} style={{ marginTop: 14, padding: '14px 20px', background: '#fff8ee', borderRadius: 16, border: '1.5px dashed #c9a96e', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
+          <span style={{ fontSize: 20 }}>{p.emoji}</span>
+          <span style={{ fontSize: 13, color: '#888' }}>
+            <strong style={{ color: '#1a1a1a' }}>{p.name}</strong> je na mape mimo záber. {p.note}
+          </span>
+        </div>
+      ))}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
         {(['all', 'visited', 'last', 'wishlist'] as Filter[]).map(f => (
@@ -78,7 +72,7 @@ export default function Cestovanie({ go: _ }: { go: (id: SectionId) => void }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: 12 }}>
         {filtered.map(p => (
-          <Card key={p.name} style={{ padding: '18px 20px' }}>
+          <Card key={p.id} style={{ padding: '18px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 20 }}>{p.emoji}</span>
               <span style={{ width: 8, height: 8, borderRadius: 99, background: DOT_COLOR[p.status], display: 'inline-block' }} />

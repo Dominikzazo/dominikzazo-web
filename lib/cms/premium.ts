@@ -60,6 +60,9 @@ export async function upsertItem(input: {
   excerpt?: string
   body?: string
   url?: string
+  mediaKey?: string
+  fileName?: string
+  mediaSize?: number
   published?: boolean
 }): Promise<void> {
   const d = await readData()
@@ -75,6 +78,9 @@ export async function upsertItem(input: {
             excerpt: input.excerpt ?? '',
             body: input.body,
             url: input.url,
+            mediaKey: input.mediaKey ?? i.mediaKey,
+            fileName: input.fileName ?? i.fileName,
+            mediaSize: input.mediaSize ?? i.mediaSize,
             published: input.published ?? i.published,
             updatedAt: now,
           }
@@ -89,6 +95,9 @@ export async function upsertItem(input: {
       excerpt: input.excerpt ?? '',
       body: input.body,
       url: input.url,
+      mediaKey: input.mediaKey,
+      fileName: input.fileName,
+      mediaSize: input.mediaSize,
       published: input.published ?? false,
       order: d.items.length,
       updatedAt: now,

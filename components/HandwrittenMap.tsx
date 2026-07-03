@@ -17,7 +17,7 @@ const pillWidth = (city: MapCity) => (city.emoji.length + city.name.length) * 6.
 // Pre-computed coordinates for all land paths
 // Projection: x = ((lon+30)/95)*880, y = ((73-lat)/53)*520
 
-export default function HandwrittenMap({ onHover }: { onHover: (city: MapCity | null) => void }) {
+export default function HandwrittenMap({ onHover, cities }: { onHover: (city: MapCity | null) => void; cities: MapCity[] }) {
   return (
     <svg
       viewBox="0 0 880 520"
@@ -166,7 +166,7 @@ export default function HandwrittenMap({ onHover }: { onHover: (city: MapCity | 
       </g>
 
       {/* City dots + pills */}
-      {MAP_CITIES_SVG.map(city => {
+      {cities.map(city => {
         const p = mp(city.lon, city.lat)
         const col = DOT_COLOR[city.status]
         const r = city.status === 'home' ? 7 : city.status === 'last' ? 9 : 5.5
@@ -208,17 +208,4 @@ export default function HandwrittenMap({ onHover }: { onHover: (city: MapCity | 
   )
 }
 
-const MAP_CITIES_SVG: MapCity[] = [
-  { name: 'Bratislava', lon: 17.1, lat: 48.1, status: 'home',     emoji: '🏠', note: 'Môj domov, môj chaos, moja láska.' },
-  { name: 'Praha',      lon: 14.4, lat: 50.1, status: 'visited',  emoji: '🍺', note: 'Starý Barrandov, Vltava, klobása.' },
-  { name: 'Viedeň',    lon: 16.4, lat: 48.2, status: 'visited',  emoji: '☕', note: 'Kaviarňová kultúra na ďalšiu úroveň.' },
-  { name: 'Budapešť',  lon: 19.0, lat: 47.5, status: 'visited',  emoji: '🌊', note: 'Kúpele Széchenyi, ruin bars, Dunaj.' },
-  { name: 'Krakov',    lon: 19.9, lat: 50.1, status: 'visited',  emoji: '🥨', note: 'Stredoveká krása. Obedy za 4€.' },
-  { name: 'Rím',       lon: 12.5, lat: 41.9, status: 'visited',  emoji: '🍕', note: 'Fontána di Trevi, pizza al taglio.' },
-  { name: 'Tenerife',  lon: -16.3, lat: 28.3, status: 'last',    emoji: '🌋', note: 'Naposledy! Sopka Teide, západ slnka. 😍' },
-  { name: 'Oslo',      lon: 10.7, lat: 59.9, status: 'wishlist', emoji: '🏔️', note: 'Fjordy, losos, a ceny čo ma zničia.' },
-  { name: 'Edinburgh', lon: -3.2, lat: 55.9, status: 'wishlist', emoji: '🏰', note: 'Škótske hrady a whisky.' },
-  { name: 'Tbilisi',   lon: 44.8, lat: 41.7, status: 'wishlist', emoji: '🍷', note: 'Gruzínske víno a khachapuri.' },
-]
-
-export { MAP_CITIES_SVG, DOT_COLOR }
+export { DOT_COLOR }

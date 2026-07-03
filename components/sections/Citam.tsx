@@ -1,24 +1,7 @@
 import Card from '@/components/ui/Card'
 import Tag from '@/components/ui/Tag'
 import type { SectionId } from '@/app/page'
-
-interface Book {
-  title: string
-  author: string
-  status: 'práve čítam' | 'prečítané' | 'chcem čítať'
-  year: number | null
-  note: string | null
-  tags: string[]
-}
-
-const BOOKS: Book[] = [
-  { title: 'O pôvode prosperity',  author: 'Rob Chovanculiak',    status: 'práve čítam', year: 2025, note: 'Konečne ekonómia, ktorá mi dáva zmysel.',       tags: ['ekonómia', 'filozofia'] },
-  { title: 'Inspirace Baťa',       author: 'Gabriela Končitíková', status: 'práve čítam', year: 2025, note: 'Baťa bol možno najväčší slow thinker v biznise.', tags: ['história', 'inšpirácia'] },
-  { title: 'Stillness Is the Key', author: 'Ryan Holiday',         status: 'prečítané',   year: 2025, note: 'Najlepšia knižka o tichu, ktorú som čítal.',      tags: ['ticho', 'filozofia'] },
-  { title: "The Artist's Way",     author: 'Julia Cameron',        status: 'prečítané',   year: 2024, note: 'Ranné strany mi zmenili život. Vážne.',           tags: ['kreativita', 'žurnálovanie'] },
-  { title: 'Slow',                 author: 'Brooke McAlary',       status: 'prečítané',   year: 2024, note: 'Praktické a ľudské. Odporúčam každému.',          tags: ['spomalenie'] },
-  { title: 'In Praise of Slowness',author: 'Carl Honoré',          status: 'chcem čítať', year: null, note: null,                                              tags: ['spomalenie'] },
-]
+import type { Book } from '@/lib/cms/types'
 
 const STATUS_COLOR: Record<string, string> = {
   'práve čítam': '#7aaa7e',
@@ -26,7 +9,7 @@ const STATUS_COLOR: Record<string, string> = {
   'chcem čítať': '#c9a96e',
 }
 
-export default function Citam({ go: _ }: { go: (id: SectionId) => void }) {
+export default function Citam({ go: _, books }: { go: (id: SectionId) => void; books: Book[] }) {
   return (
     <div className="page-enter page-pad" style={{ maxWidth: 900, margin: '0 auto' }}>
       <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
@@ -43,8 +26,8 @@ export default function Citam({ go: _ }: { go: (id: SectionId) => void }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
-        {BOOKS.map((b, i) => (
-          <Card key={i} style={{ padding: 24 }}>
+        {books.map((b) => (
+          <Card key={b.id} style={{ padding: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: STATUS_COLOR[b.status], fontWeight: 500 }}>
                 <span style={{ width: 6, height: 6, borderRadius: 99, background: STATUS_COLOR[b.status], display: 'inline-block' }} />

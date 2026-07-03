@@ -80,7 +80,23 @@ export default async function ObsahPage() {
             <h2 className="font-lora text-[20px] mb-5">{cat.name}</h2>
             <div className="flex flex-col divide-y divide-black/[0.07] border-y border-black/[0.07]">
               {items.map((it) =>
-                it.type === 'link' && it.url ? (
+                it.type === 'file' ? (
+                  <a
+                    key={it.id}
+                    href={`/clenska/media/${it.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kruh-essay block py-5 no-underline"
+                  >
+                    <h3 className="kruh-essay-title font-lora text-[18px] mb-1 text-[#1a1a1a]">
+                      {it.title} ↓
+                    </h3>
+                    <p className="text-[14px] leading-[1.6] text-[#666]">
+                      {it.excerpt || it.fileName}
+                      {it.mediaSize ? ` · ${(it.mediaSize / 1024 / 1024).toFixed(1)} MB` : ''}
+                    </p>
+                  </a>
+                ) : it.type === 'link' && it.url ? (
                   <a
                     key={it.id}
                     href={it.url}

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { listCategories, listItems } from '@/lib/cms/premium'
 import { addCategory, removeCategory, addItem, removeItem, togglePublish } from './actions'
+import FileUploadForm from '@/components/admin/FileUploadForm'
 
 const input =
   'w-full rounded-lg border border-black/[0.12] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#c9a96e]'
@@ -67,7 +68,7 @@ export default async function KruhAdmin() {
                   <span className="truncate text-[14px] font-medium">{it.title}</span>
                 </div>
                 <p className="mt-0.5 text-[12px] text-[#999]">
-                  {it.type === 'article' ? 'esej' : 'odkaz'} · {catName(it.categoryId)}
+                  {it.type === 'article' ? 'esej' : it.type === 'file' ? `súbor (${it.fileName ?? ''})` : 'odkaz'} · {catName(it.categoryId)}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-3">
@@ -116,6 +117,13 @@ export default async function KruhAdmin() {
           </form>
         )}
       </section>
+
+      {/* Upload súborov (PDF, audio, krátke video) do private Blobu */}
+      {cats.length > 0 && (
+        <section className="mb-10">
+          <FileUploadForm categories={cats.map((c) => ({ id: c.id, name: c.name }))} />
+        </section>
+      )}
 
       <p className="text-[12px] text-[#aaa]">
         Zmeny sa okamžite prejavia na <Link href="/clenska/obsah" className="underline">/clenska/obsah</Link>.
