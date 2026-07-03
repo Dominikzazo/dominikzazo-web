@@ -1,7 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 // Chránené route členskej sekcie. Verejný landing /clenska ostáva otvorený.
-const isProtected = createRouteMatcher(['/clenska/obsah(.*)'])
+const isProtected = createRouteMatcher(['/clenska/obsah(.*)', '/clenska/admin(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtected(req)) {

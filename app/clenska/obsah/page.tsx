@@ -2,20 +2,19 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import { getMember } from '@/lib/members/session'
+import { listCategories, listItems } from '@/lib/cms/premium'
 
 export const metadata = { title: 'Kruh · obsah · Dominik Žažo' }
-
-// Placeholder obsah — reálne texty/PDF doplníme. Route je chránená v proxy.ts,
-// tu je ešte druhá poistka pre istotu.
-const ESSAYS = [
-  { t: 'Ako som prestal vypĺňať ticho', d: 'O tom, prečo je nuda vstupná brána, nie problém.' },
-  { t: 'Ranný list sebe', d: 'Praktika, ktorá mi vydržala najdlhšie zo všetkých.' },
-  { t: 'Menej, ale hlbšie', d: 'Prečo som zmazal appky a čo sa stalo potom.' },
-]
 
 export default async function ObsahPage() {
   const member = await getMember()
   if (!member.isAuthed) redirect('/sign-in')
+
+  const [cats, allItems] = await Promise.all([listCategories(), listItems()])
+  const published = allItems.filter((i) => i.published)
+  const sections = cats
+    .map((c) => ({ cat: c, items: published.filter((i) => i.categoryId === c.id) }))
+    .filter((s) => s.items.length > 0)
 
   return (
     <main className="min-h-screen bg-[#fafaf8] text-[#1a1a1a] page-pad flex flex-col items-center">
@@ -27,7 +26,18 @@ export default async function ObsahPage() {
         >
           ← kruh
         </Link>
-        <UserButton />
+        <div className="flex items-center gap-4">
+          {member.isAdmin && (
+            <Link
+              href="/clenska/admin"
+              className="text-[12px] no-underline hover:underline"
+              style={{ color: '#a8843f' }}
+            >
+              ✦ admin
+            </Link>
+          )}
+          <UserButton />
+        </div>
       </div>
 
       {/* header */}
@@ -52,49 +62,58 @@ export default async function ObsahPage() {
           Vitaj v kruhu{member.firstName ? `, ${member.firstName}` : ''}.
         </h1>
         <p className="text-[15.5px] leading-[1.7] text-[#666]">
-          Toto je tvoje tiché miesto. Zatiaľ je tu placeholder — čoskoro pribudnú
-          reálne eseje a materiály na stiahnutie.
+          Toto je tvoje tiché miesto — texty a materiály, ktoré nedávam na verejný web.
         </p>
       </header>
 
       <hr className="kruh-hairline w-full max-w-2xl mb-10" />
 
-      {/* PDF download placeholder */}
-      <section className="w-full max-w-2xl mb-12">
-        <div
-          className="flex items-center justify-between gap-4 rounded-2xl border px-5 py-5"
-          style={{ borderColor: 'rgba(201,169,110,0.4)', background: 'rgba(201,169,110,0.08)' }}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-[16px]" style={{ color: '#a8843f' }} aria-hidden>🔒</span>
-            <div>
-              <h3 className="font-lora text-[17px] mb-0.5">Sprievodca tichom (PDF)</h3>
-              <p className="text-[13px] text-[#777]">7 strán · pracovný list k spomaleniu</p>
+      {sections.length === 0 ? (
+        <section className="w-full max-w-2xl">
+          <p className="text-[14px] leading-[1.7] text-[#888]">
+            Zatiaľ tu nič nie je — pripravujem prvý obsah. Čoskoro. 🤍
+          </p>
+        </section>
+      ) : (
+        sections.map(({ cat, items }) => (
+          <section key={cat.id} className="w-full max-w-2xl mb-12">
+            <h2 className="font-lora text-[20px] mb-5">{cat.name}</h2>
+            <div className="flex flex-col divide-y divide-black/[0.07] border-y border-black/[0.07]">
+              {items.map((it) =>
+                it.type === 'link' && it.url ? (
+                  <a
+                    key={it.id}
+                    href={it.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kruh-essay block py-5 no-underline"
+                  >
+                    <h3 className="kruh-essay-title font-lora text-[18px] mb-1 text-[#1a1a1a]">
+                      {it.title} ↗
+                    </h3>
+                    {it.excerpt && (
+                      <p className="text-[14px] leading-[1.6] text-[#666]">{it.excerpt}</p>
+                    )}
+                  </a>
+                ) : (
+                  <Link
+                    key={it.id}
+                    href={`/clenska/obsah/${it.id}`}
+                    className="kruh-essay block py-5 no-underline"
+                  >
+                    <h3 className="kruh-essay-title font-lora text-[18px] mb-1 text-[#1a1a1a]">
+                      {it.title}
+                    </h3>
+                    {it.excerpt && (
+                      <p className="text-[14px] leading-[1.6] text-[#666]">{it.excerpt}</p>
+                    )}
+                  </Link>
+                ),
+              )}
             </div>
-          </div>
-          <span
-            className="kruh-shimmer shrink-0 rounded-full px-5 py-2.5 text-[13.5px] font-medium cursor-not-allowed"
-            style={{ background: 'rgba(201,169,110,0.9)', color: '#1a1a1a' }}
-            title="Čoskoro"
-          >
-            Čoskoro ↓
-          </span>
-        </div>
-      </section>
-
-      {/* essays placeholder */}
-      <section className="w-full max-w-2xl">
-        <h2 className="font-lora text-[20px] mb-5">Eseje</h2>
-        <div className="flex flex-col divide-y divide-black/[0.07] border-y border-black/[0.07]">
-          {ESSAYS.map((e) => (
-            <article key={e.t} className="kruh-essay py-5 cursor-default">
-              <h3 className="kruh-essay-title font-lora text-[18px] mb-1">{e.t}</h3>
-              <p className="text-[14px] leading-[1.6] text-[#666]">{e.d}</p>
-            </article>
-          ))}
-        </div>
-        <p className="mt-6 text-[12px] text-[#aaa]">Čoskoro odomknuté · pripravujem obsah</p>
-      </section>
+          </section>
+        ))
+      )}
     </main>
   )
 }
