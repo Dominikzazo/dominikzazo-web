@@ -10,3 +10,8 @@ node_modules/
 *.local
 .env
 .env*.local
+
+# Agent tooling / build cache
+.agents/
+skills-lock.json
+tsconfig.tsbuildinfo

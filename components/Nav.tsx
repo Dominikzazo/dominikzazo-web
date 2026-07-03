@@ -80,6 +80,27 @@ export default function Nav({ active, go }: NavProps) {
         <span className="sm:hidden">☕</span>
         <span className="hidden sm:inline">☕ pomalé ráno ↗</span>
       </Link>
+      <Link
+        href="/clenska"
+        className="rounded-full px-[8px] py-[3px] text-[10.5px] sm:px-[13px] sm:py-[6px] sm:text-[12px] tracking-[0.01em] transition-all duration-200 no-underline whitespace-nowrap"
+        style={{
+          border: '1.5px solid #c9a96e',
+          fontFamily: 'var(--font-inter), sans-serif',
+          color: '#a8843f',
+          background: 'transparent',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = '#c9a96e'
+          e.currentTarget.style.color = '#1a1a1a'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'transparent'
+          e.currentTarget.style.color = '#a8843f'
+        }}
+      >
+        <span className="sm:hidden">✦</span>
+        <span className="hidden sm:inline">✦ kruh</span>
+      </Link>
     </nav>
   )
 }

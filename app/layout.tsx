@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { Lora, Inter, Caveat } from 'next/font/google'
+import { ClerkProvider } from '@clerk/nextjs'
+import { skSK } from '@clerk/localizations'
+import { clerkAppearance } from '@/lib/members/clerkAppearance'
 import './globals.css'
 
 const lora = Lora({
@@ -27,7 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="sk" className={`${lora.variable} ${inter.variable} ${caveat.variable}`}>
       <body className="bg-[#fafaf8] text-[#1a1a1a] font-inter antialiased min-h-screen">
-        {children}
+        <ClerkProvider localization={skSK} appearance={clerkAppearance} afterSignOutUrl="/clenska">
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   )
