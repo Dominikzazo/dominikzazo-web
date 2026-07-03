@@ -16,14 +16,12 @@ export default function Home({ go }: { go: (id: SectionId) => void }) {
   const ref1 = useRef<HTMLDivElement>(null)
   const ref2 = useRef<HTMLDivElement>(null)
 
+  // Parallax dočasne VYPNUTÝ — pri väčšom scrolle posúval bento karty mimo
+  // mriežky a rozhadzoval layout. TODO: vrátiť jemnejšiu verziu s clampom
+  // (malý koeficient + Math.min limit), nech to len jemne "dýcha".
   useEffect(() => {
-    const f = () => {
-      const y = window.scrollY
-      if (ref1.current) ref1.current.style.transform = `translate(${y * 0.04}px, ${y * 0.07}px)`
-      if (ref2.current) ref2.current.style.transform = `translate(${-y * 0.05}px, ${-y * 0.06}px)`
-    }
-    window.addEventListener('scroll', f, { passive: true })
-    return () => window.removeEventListener('scroll', f)
+    if (ref1.current) ref1.current.style.transform = ''
+    if (ref2.current) ref2.current.style.transform = ''
   }, [])
 
   return (
