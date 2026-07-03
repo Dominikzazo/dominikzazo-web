@@ -70,7 +70,7 @@ export default function HomeClient({ books, places, monthly }: HomeClientProps) 
 
       {/* Main scrollable content — sits above reveal */}
       <div className="relative z-[1] bg-[#fafaf8] flex flex-col min-h-screen">
-        <Nav active={active} go={go} />
+        <Nav active={active} go={go} majLabel={monthly.heading.replace(/\./g, '').trim()} />
         <main className="flex-1">
           {renderSection()}
         </main>

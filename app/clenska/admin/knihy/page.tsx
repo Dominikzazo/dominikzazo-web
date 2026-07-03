@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { listBooks } from '@/lib/cms/public'
 import { saveBook, removeBook } from './actions'
+import SaveButton from '@/components/admin/SaveButton'
 import type { Book } from '@/lib/cms/types'
 
 const input =
@@ -26,7 +27,7 @@ function BookForm({ book }: { book?: Book }) {
       </div>
       <input name="note" placeholder="Poznámka (kurzívou na karte)" defaultValue={book?.note ?? ''} className={input} />
       <input name="tags" placeholder="Tagy oddelené čiarkou (ticho, filozofia)" defaultValue={book?.tags.join(', ')} className={input} />
-      <button className={`${btnGold} self-start`}>{book ? 'Uložiť zmeny' : '+ Pridať knihu'}</button>
+      <SaveButton>{book ? 'Uložiť zmeny' : '+ Pridať knihu'}</SaveButton>
     </form>
   )
 }

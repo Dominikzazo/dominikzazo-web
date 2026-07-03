@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getMonthly } from '@/lib/cms/public'
 import { saveMonthly } from './actions'
+import SaveButton from '@/components/admin/SaveButton'
 
 const input =
   'w-full rounded-lg border border-black/[0.12] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#c9a96e]'
@@ -57,9 +58,10 @@ export default async function MesacnyAdmin() {
           <p className={label}>Citát na záver (Caveat rukopis)</p>
           <input name="quote" defaultValue={m.quote} className={input} />
         </div>
-        <button className="self-start rounded-full bg-[#c9a96e] px-6 py-2.5 text-[13.5px] font-medium text-[#1a1a1a] hover:bg-[#b8985d]">
-          Uložiť mesačný edit
-        </button>
+        <SaveButton>Uložiť mesačný edit</SaveButton>
+        <p className="text-[12px] text-[#aaa]">
+          Nadpis (napr. „júl 🌸") sa automaticky prepíše aj v menu na homepage.
+        </p>
       </form>
     </main>
   )

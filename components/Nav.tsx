@@ -3,22 +3,23 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { SectionId } from '@/app/page'
 
-const NAV_ITEMS: { id: SectionId; label: string }[] = [
-  { id: 'home',       label: 'domov' },
-  { id: 'maj',        label: 'máj 🌸' },
-  { id: 'myslienky',  label: 'myšlienky' },
-  { id: 'citam',      label: 'čítam' },
-  { id: 'cestovanie', label: 'cestovanie' },
-  { id: 'projekty',   label: 'projekty 🟠' },
-  { id: 'o-mne',      label: 'o mne' },
-]
-
 interface NavProps {
   active: SectionId
   go: (id: SectionId) => void
+  majLabel?: string // dynamický názov mesačnej sekcie z CMS (napr. „júl 🌸")
 }
 
-export default function Nav({ active, go }: NavProps) {
+export default function Nav({ active, go, majLabel }: NavProps) {
+  const NAV_ITEMS: { id: SectionId; label: string }[] = [
+    { id: 'home',       label: 'domov' },
+    { id: 'maj',        label: majLabel || 'máj 🌸' },
+    { id: 'myslienky',  label: 'myšlienky' },
+    { id: 'citam',      label: 'čítam' },
+    { id: 'cestovanie', label: 'cestovanie' },
+    { id: 'projekty',   label: 'projekty 🟠' },
+    { id: 'o-mne',      label: 'o mne' },
+  ]
+
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {

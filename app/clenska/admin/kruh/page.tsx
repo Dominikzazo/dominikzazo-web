@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { listCategories, listItems } from '@/lib/cms/premium'
 import { addCategory, removeCategory, addItem, removeItem, togglePublish } from './actions'
 import FileUploadForm from '@/components/admin/FileUploadForm'
+import SaveButton from '@/components/admin/SaveButton'
 
 const input =
   'w-full rounded-lg border border-black/[0.12] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#c9a96e]'
@@ -113,7 +114,7 @@ export default async function KruhAdmin() {
             <label className="flex items-center gap-2 text-[13px] text-[#666]">
               <input type="checkbox" name="published" /> publikovať hneď
             </label>
-            <button className={`${btnGold} self-start`}>+ Pridať položku</button>
+            <SaveButton>+ Pridať položku</SaveButton>
           </form>
         )}
       </section>

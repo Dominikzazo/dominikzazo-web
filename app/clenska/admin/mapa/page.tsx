@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { listPlaces } from '@/lib/cms/public'
 import { savePlace, removePlace } from './actions'
+import SaveButton from '@/components/admin/SaveButton'
 import type { Place } from '@/lib/cms/types'
 
 const input =
@@ -37,7 +38,7 @@ function PlaceForm({ place }: { place?: Place }) {
         <input type="checkbox" name="onMap" defaultChecked={place?.onMap ?? true} />
         zobraziť ako pin na mape (vypni pre miesta mimo Európy, napr. Tokio)
       </label>
-      <button className={`${btnGold} self-start`}>{place ? 'Uložiť zmeny' : '+ Pridať miesto'}</button>
+      <SaveButton>{place ? 'Uložiť zmeny' : '+ Pridať miesto'}</SaveButton>
     </form>
   )
 }
