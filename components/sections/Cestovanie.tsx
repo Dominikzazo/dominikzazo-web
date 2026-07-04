@@ -19,11 +19,11 @@ export default function Cestovanie({ go: _, places }: { go: (id: SectionId) => v
   const filtered = filter === 'all' ? places : places.filter(p => p.status === filter)
 
   return (
-    <div className="page-enter page-pad" style={{ maxWidth: 1000, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 1000, margin: '28px auto 0' }}>
+      <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 8, letterSpacing: '-0.02em' }}>
         cestovanie.
       </h2>
-      <p style={{ color: 'rgb(161,161,161)', fontSize: 15, marginBottom: 36, fontFamily: 'var(--font-inter), sans-serif', fontWeight: 400 }}>
+      <p style={{ color: 'rgb(161,161,161)', fontSize: 15, marginBottom: 28, fontFamily: 'var(--font-inter), sans-serif', fontWeight: 400 }}>
         Plánované aj random. Rýchlikom, vždy rýchlikom. 🚄
       </p>
 

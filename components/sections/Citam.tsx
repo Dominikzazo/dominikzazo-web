@@ -11,12 +11,12 @@ const STATUS_COLOR: Record<string, string> = {
 
 export default function Citam({ go: _, books }: { go: (id: SectionId) => void; books: Book[] }) {
   return (
-    <div className="page-enter page-pad" style={{ maxWidth: 900, margin: '0 auto' }}>
-      <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 900, margin: '28px auto 0' }}>
+      <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 10, letterSpacing: '-0.02em' }}>
         čítam.
       </h2>
 
-      <div style={{ display: 'flex', gap: 14, marginBottom: 48, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 14, marginBottom: 32, flexWrap: 'wrap' }}>
         {Object.entries(STATUS_COLOR).map(([s, c]) => (
           <span key={s} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#888' }}>
             <span style={{ width: 8, height: 8, borderRadius: 99, background: c, display: 'inline-block' }} />

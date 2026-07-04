@@ -4,14 +4,14 @@ import type { MonthlyEdit } from '@/lib/cms/types'
 
 export default function Maj({ go: _, monthly }: { go: (id: SectionId) => void; monthly: MonthlyEdit }) {
   return (
-    <div className="page-enter page-pad" style={{ maxWidth: 680, margin: '0 auto' }}>
-      <div style={{ fontSize: 13, color: '#aaa', letterSpacing: '0.06em', marginBottom: 16, fontFamily: 'var(--font-inter), sans-serif' }}>
+    <div className="page-enter page-pad" style={{ maxWidth: 680, margin: '28px auto 0' }}>
+      <div style={{ fontSize: 13, color: '#aaa', letterSpacing: '0.06em', marginBottom: 14, fontFamily: 'var(--font-inter), sans-serif' }}>
         {monthly.label}
       </div>
-      <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
+      <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 8, letterSpacing: '-0.02em' }}>
         {monthly.heading}
       </h2>
-      <p style={{ color: '#aaa', fontSize: 15, marginBottom: 56, fontFamily: 'var(--font-inter), sans-serif' }}>
+      <p style={{ color: '#aaa', fontSize: 15, marginBottom: 36, fontFamily: 'var(--font-inter), sans-serif' }}>
         {monthly.subtitle}
       </p>
 

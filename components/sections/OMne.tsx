@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import type { SectionId } from '@/app/page'
+import type { MonthlyEdit } from '@/lib/cms/types'
 
 const FUN_FACTS = [
   { e: '☕', t: 'Chemex adept',        d: 'Pomalá káva pre pomalý deň.' },
@@ -14,14 +15,22 @@ const FUN_FACTS = [
   { e: '🥤', t: 'Kofola závislosť',     d: '...závislosť je silné slovo. Alebo nie? :OO' },
 ]
 
-const NAV_CARDS = [
-  { label: 'myšlienky.', desc: 'Reflexie z denníka',       target: 'myslienky' as SectionId, bg: '#1a1a1a' },
-  { label: 'projekty. 🟠', desc: 'Bitcoin + Substack',    target: 'projekty'  as SectionId, bg: '#1a1a1a' },
-  { label: 'cestovanie.',  desc: 'Kde som bol, kam idem',   target: 'cestovanie' as SectionId, bg: '#2a2a2a' },
-  { label: 'máj. 🌸',     desc: 'Čo ma čaká tento mesiac', target: 'maj'        as SectionId, bg: '#2a2a2a' },
+interface NavCardDef {
+  label: string
+  desc: string
+  target: SectionId
+  bg: string
+}
+
+// Mesačná karta berie label z CMS (monthly.heading) — mení sa spolu s menu
+const navCards = (monthlyHeading: string): NavCardDef[] => [
+  { label: 'myšlienky.', desc: 'Reflexie z denníka', target: 'myslienky', bg: '#1a1a1a' },
+  { label: 'projekty. 🟠', desc: 'Bitcoin + Substack', target: 'projekty', bg: '#1a1a1a' },
+  { label: 'cestovanie.', desc: 'Kde som bol, kam idem', target: 'cestovanie', bg: '#2a2a2a' },
+  { label: monthlyHeading, desc: 'Čo ma čaká tento mesiac', target: 'maj', bg: '#2a2a2a' },
 ]
 
-function NavCard({ card, go }: { card: typeof NAV_CARDS[0]; go: (id: SectionId) => void }) {
+function NavCard({ card, go }: { card: NavCardDef; go: (id: SectionId) => void }) {
   const [hovered, setHovered] = useState(false)
   return (
     <div
@@ -50,7 +59,7 @@ function NavCard({ card, go }: { card: typeof NAV_CARDS[0]; go: (id: SectionId) 
   )
 }
 
-export default function OMne({ go }: { go: (id: SectionId) => void }) {
+export default function OMne({ go, monthly }: { go: (id: SectionId) => void; monthly: MonthlyEdit }) {
   return (
     <div className="page-enter page-pad" style={{ maxWidth: 740, margin: '0 auto' }}>
 
@@ -142,7 +151,7 @@ export default function OMne({ go }: { go: (id: SectionId) => void }) {
           kde ma nájdeš.
         </h3>
         <div className="nav-cards-grid">
-          {NAV_CARDS.map(card => <NavCard key={card.target} card={card} go={go} />)}
+          {navCards(monthly.heading).map(card => <NavCard key={card.target} card={card} go={go} />)}
         </div>
       </div>
 

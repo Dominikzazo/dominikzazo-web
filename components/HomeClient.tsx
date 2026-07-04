@@ -53,7 +53,7 @@ export default function HomeClient({ books, places, monthly }: HomeClientProps) 
       case 'projekty':
         return <Projekty go={go} />
       case 'o-mne':
-        return <OMne go={go} />
+        return <OMne go={go} monthly={monthly} />
       default:
         return <Home go={go} />
     }
