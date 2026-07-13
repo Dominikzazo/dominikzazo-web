@@ -16,3 +16,6 @@ node_modules/
 skills-lock.json
 tsconfig.tsbuildinfo
 .vercel
+
+# Git worktrees
+.worktrees/
