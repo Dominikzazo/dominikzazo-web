@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import type { Sequence, SequenceEmail, SequenceTrigger } from '@/lib/newsletter/types'
 import EmailEditor from './EmailEditor'
-import { Btn, BTC, COLORS, TRIGGER_LABELS, TRIGGER_OPTIONS, inputStyle, labelStyle } from './shared'
+import { Btn, BTC, BTC_LIGHT, BTC_BORDER, COLORS, TRIGGER_LABELS, TRIGGER_OPTIONS, inputStyle, labelStyle } from './shared'
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -479,6 +479,22 @@ export default function NewsletterAdmin() {
           + Nová
         </Btn>
       </div>
+
+      <a
+        href="/admin/newsletter/tyzdenne"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none',
+          background: BTC_LIGHT, border: `0.5px solid ${BTC_BORDER}`, borderRadius: 14,
+          padding: '16px 18px', marginBottom: 18,
+        }}
+      >
+        <span style={{ fontSize: 24 }}>🕊️</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textPrimary }}>Napíš týždenné číslo → „Nedeľné ticho"</div>
+          <div style={{ fontSize: 12, color: COLORS.textSecondary, marginTop: 2 }}>1 myšlienka · 1 krok · 1 otázka — pošli celému zoznamu</div>
+        </div>
+        <span style={{ color: BTC, fontSize: 18 }}>→</span>
+      </a>
 
       {loadErr && <p style={{ margin: '0 0 14px', fontSize: 12, color: COLORS.textDanger }}>{loadErr}</p>}
       {saveState === 'saving' && <p style={{ margin: '0 0 14px', fontSize: 12, color: COLORS.textMuted }}>Ukladám…</p>}
