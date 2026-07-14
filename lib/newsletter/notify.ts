@@ -31,11 +31,12 @@ export async function sendSequenceEmail(
 ): Promise<void> {
   const resend = resendClient()
   if (!resend || !to) return
+  const avatar = process.env.NEWSLETTER_AVATAR_URL || undefined
   await resend.emails.send({
     from: FROM,
     to,
     subject,
     text: renderEmailText(body),
-    html: renderEmailHtml(body, imageUrl),
+    html: renderEmailHtml(body, imageUrl, avatar),
   })
 }
