@@ -75,7 +75,13 @@ export default function EmailEditor({
       // priamy upload z prehliadača do Vercel Blobu cez token z /api/admin/upload.
       // Na rozdiel od FileUploadForm (private, členský obsah) tu volíme 'public',
       // lebo obrázok musí byť načítateľný priamo v emailovom kliente príjemcu.
-      const blob = await upload(`newsletter/${Date.now()}-${file.name}`, file, {
+      // Očisti názov: odstráň diakritiku, medzery a špeciálne znaky,
+      // ktoré vedia rozbiť Blob pathname/URL.
+      const safeName = file.name
+        .normalize('NFD')
+        .replace(/[^a-zA-Z0-9._-]/g, '-')
+        .replace(/-+/g, '-')
+      const blob = await upload(`newsletter/${Date.now()}-${safeName}`, file, {
         access: 'public',
         handleUploadUrl: '/api/admin/upload',
       })
