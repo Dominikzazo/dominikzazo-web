@@ -48,7 +48,7 @@ export default function SubscribeForm() {
         type="text"
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
-        placeholder="Meno (nepovinné)"
+        placeholder="Meno"
         autoComplete="given-name"
         style={inputStyle}
       />
