@@ -7,10 +7,33 @@ const EMOJIS = ['💗', '💛', '🌿', '✨', '🤍']
 export default function BottomSurprise() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState(false)
   const [hearts, setHearts] = useState<Heart[]>([])
 
-  const send = () => {
-    if (!email.includes('@')) return
+  const send = async () => {
+    if (!email.includes('@') || busy) return
+    setBusy(true)
+    setErr(false)
+    try {
+      // Reálne prihlásenie do newslettera (vlastný Resend zoznam).
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (!data.ok) {
+        setErr(true)
+        setBusy(false)
+        return
+      }
+    } catch {
+      setErr(true)
+      setBusy(false)
+      return
+    }
+    setBusy(false)
     setSent(true)
     setHearts(
       Array.from({ length: 16 }, (_, i) => ({
@@ -73,6 +96,7 @@ export default function BottomSurprise() {
             />
             <button
               onClick={send}
+              disabled={busy}
               className="rounded-full cursor-pointer"
               style={{
                 border: 'none',
@@ -81,11 +105,17 @@ export default function BottomSurprise() {
                 fontFamily: 'var(--font-caveat), cursive',
                 background: '#1a1a1a',
                 color: '#fff',
+                opacity: busy ? 0.6 : 1,
               }}
             >
-              odoslať 💗
+              {busy ? 'posielam…' : 'odoslať 💗'}
             </button>
           </div>
+          {err && (
+            <p style={{ fontFamily: 'var(--font-caveat), cursive', fontSize: 18, color: '#c0392b', marginTop: 14 }}>
+              hmm, niečo sa pokazilo. skús to ešte raz 🌿
+            </p>
+          )}
         </>
       ) : (
         <>

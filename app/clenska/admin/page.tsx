@@ -83,6 +83,14 @@ export default async function AdminHome() {
             {items.length} položiek · {published} publikovaných · {cats.length} kategórií
           </p>
         </Link>
+
+        <Link href="/admin/newsletter" className={TILE}>
+          <TileIcon>✉</TileIcon>
+          <h2 className="mb-1 font-lora text-[18px] text-[#1a1a1a]">Newsletter</h2>
+          <p className="text-[13px] leading-[1.6] text-[#666]">
+            Email sekvencie · AI písanie · odberatelia
+          </p>
+        </Link>
       </div>
     </main>
   )
