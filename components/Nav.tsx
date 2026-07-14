@@ -58,6 +58,29 @@ export default function Nav({ active, go, majLabel }: NavProps) {
         </button>
       ))}
       <Link
+        href="/newsletter"
+        className="rounded-full px-[8px] py-[3px] text-[10.5px] sm:px-[13px] sm:py-[6px] sm:text-[12px] tracking-[0.01em] transition-all duration-200 no-underline whitespace-nowrap"
+        style={{
+          border: '1.5px solid #e0dcd6',
+          fontFamily: 'var(--font-inter), sans-serif',
+          color: '#888',
+          background: 'transparent',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = '#F7931A'
+          e.currentTarget.style.color = '#fff'
+          e.currentTarget.style.borderColor = '#F7931A'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'transparent'
+          e.currentTarget.style.color = '#888'
+          e.currentTarget.style.borderColor = '#e0dcd6'
+        }}
+      >
+        <span className="sm:hidden">✉</span>
+        <span className="hidden sm:inline">✉ newsletter</span>
+      </Link>
+      <Link
         href="/slow-life"
         target="_blank"
         className="rounded-full px-[8px] py-[3px] text-[10.5px] sm:px-[13px] sm:py-[6px] sm:text-[12px] tracking-[0.01em] transition-all duration-200 no-underline whitespace-nowrap"
