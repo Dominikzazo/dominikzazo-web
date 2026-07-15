@@ -88,6 +88,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Neznámy režim.' }, { status: 400 })
   } catch (err) {
     console.error('assist error', err)
-    return NextResponse.json({ error: 'AI zlyhalo. Skús znova.' }, { status: 502 })
+    const detail = err instanceof Error ? err.message : String(err)
+    return NextResponse.json({ error: `AI zlyhalo: ${detail.slice(0, 220)}` }, { status: 502 })
   }
 }
