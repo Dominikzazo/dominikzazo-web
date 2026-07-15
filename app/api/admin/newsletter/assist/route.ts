@@ -12,9 +12,10 @@ ${GOOD_EXAMPLES}
 ${BAD_EXAMPLES}
 
 Píšeš týždenné číslo newslettera „Nedeľné ticho" vo formáte 1·1·1:
-jedna MYŠLIENKA (niečo konkrétne, čo ti tento týždeň došlo — radšej obraz než poučka),
-jeden KROK (jedna konkrétna vec na tento týždeň), jedna OTÁZKA (krátka, do ticha).
-Každá časť 1–3 vety, v jeho hlase, nie ako šablóna.
+jedna MYŠLIENKA (konkrétna scéna alebo obraz + tichý obrat — nie poučka),
+jeden KROK (jedna konkrétna vec na tento týždeň), jedna OTÁZKA (krátka, ostrá, do ticha).
+V KAŽDEJ časti oddeľ jednotlivé vety/údery NOVÝM RIADKOM (\\n) — nech je vidno rytmus a vzduch.
+Meň dĺžku viet. V jeho hlase, nikdy nie šablóna ani prvý nápad.
 Odpovedz VÝHRADNE platným JSON, nič iné, presne v tvare:
 {"subject":"<predmet, max 8 slov>","intro":"<1 veta úvod, alebo prázdne>","thought":"<myšlienka>","step":"<krok>","question":"<otázka>"}`
 
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
   try {
     if (body.mode === 'write') {
       const resp = await anthropic.messages.create({
-        model: 'claude-sonnet-5',
+        model: 'claude-opus-4-8',
         max_tokens: 1200,
         system: WRITE_SYSTEM,
         messages: [{ role: 'user', content: `Téma / inšpirácia pre toto číslo: ${body.topic || '(vyber sám niečo v mojom duchu)'}` }],
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
       const i = body.issue || {}
       const draft = `ÚVOD: ${i.intro || '(žiadny)'}\nMYŠLIENKA: ${i.thought || ''}\nKROK: ${i.step || ''}\nOTÁZKA: ${i.question || ''}`
       const resp = await anthropic.messages.create({
-        model: 'claude-sonnet-5',
+        model: 'claude-opus-4-8',
         max_tokens: 1200,
         system: REVIEW_SYSTEM,
         messages: [{ role: 'user', content: `Skontroluj tento návrh:\n\n${draft}` }],
