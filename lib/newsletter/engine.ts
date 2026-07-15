@@ -43,10 +43,15 @@ export function advance(enrollment: Enrollment, sequence: Sequence, now: Date = 
   if (!nextEmail) {
     return { ...enrollment, nextEmailIndex: nextIndex, status: 'done' }
   }
+  // Zarovnaj na začiatok cieľového dňa (UTC), nech ho denný ranný cron
+  // pošle v to ráno — nie o deň neskôr (napr. prihlásenie o 23:00 + delay 1
+  // by inak padlo na 23:00 ďalší deň a minulo by ranný cron).
+  const due = new Date(now.getTime() + nextEmail.delayDays * 86400000)
+  due.setUTCHours(0, 0, 0, 0)
   return {
     ...enrollment,
     nextEmailIndex: nextIndex,
-    nextSendAt: new Date(now.getTime() + nextEmail.delayDays * 86400000).toISOString(),
+    nextSendAt: due.toISOString(),
     status: 'active',
   }
 }

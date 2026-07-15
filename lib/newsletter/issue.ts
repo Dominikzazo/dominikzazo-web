@@ -4,6 +4,8 @@
 // odlíšené labelmi, nech to nie je jednoliate.
 // Osobné oslovenie: broadcast → Resend merge tag, test → konkrétne meno.
 
+import { footerHtml, footerText } from './footer'
+
 export interface Issue {
   subject: string
   intro?: string
@@ -33,7 +35,7 @@ function section(label: string, text: string): string {
   </div>`
 }
 
-export function renderIssueText(issue: Issue, name: string): string {
+export function renderIssueText(issue: Issue, name: string, unsubUrl?: string): string {
   const intro = issue.intro ? `${issue.intro}\n\n` : ''
   return `Ahoj ${name},
 
@@ -49,11 +51,10 @@ ${issue.question}
 Till next Sunday,
 Dominik
 
-Odpíš mi pokojne — čítam všetko.
-Odhlásiť sa: napíš mi späť na tento mail.`
+${footerText(unsubUrl)}`
 }
 
-export function renderIssueHtml(issue: Issue, nameToken: string, avatarUrl?: string): string {
+export function renderIssueHtml(issue: Issue, nameToken: string, avatarUrl?: string, unsubUrl?: string): string {
   const avatar = avatarUrl
     ? `<img src="${esc(avatarUrl)}" alt="Dominik Žažo" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:10px;"/>`
     : ''
@@ -81,10 +82,7 @@ export function renderIssueHtml(issue: Issue, nameToken: string, avatarUrl?: str
         </td></tr>
 
         <tr><td style="padding:32px 0 0;">
-          <p style="margin:0;font:400 13px/1.7 Arial,sans-serif;color:#a5a29c;">
-            Odpíš mi pokojne — čítam všetko.<br/>
-            Dostal si to, lebo si sa prihlásil na dominikzazo.sk. Odhlásiť sa? Stačí odpísať.
-          </p>
+          ${footerHtml(unsubUrl)}
         </td></tr>
 
       </table>

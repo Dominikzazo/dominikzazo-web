@@ -1,5 +1,9 @@
 import { Resend } from 'resend'
 import { renderIssueHtml, renderIssueText, type Issue } from './issue'
+import { unsubscribeUrl } from './unsubscribe'
+
+// Resend pri broadcaste vyžaduje odhlasovací odkaz — nahradí ho spravovanou URL.
+const RESEND_UNSUB = '{{{RESEND_UNSUBSCRIBE_URL}}}'
 
 const FROM =
   process.env.NEWSLETTER_FROM_EMAIL ||
@@ -23,12 +27,17 @@ export async function sendTestIssue(
   const resend = resendClient()
   if (!resend) return { ok: false, error: 'RESEND_API_KEY chýba.' }
   const avatar = process.env.NEWSLETTER_AVATAR_URL || undefined
+  const unsub = unsubscribeUrl(to)
   const { error } = await resend.emails.send({
     from: FROM,
     to,
     subject: `[TEST] ${issue.subject}`,
-    html: renderIssueHtml(issue, name, avatar),
-    text: renderIssueText(issue, name),
+    html: renderIssueHtml(issue, name, avatar, unsub),
+    text: renderIssueText(issue, name, unsub),
+    headers: {
+      'List-Unsubscribe': `<${unsub}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    },
   })
   return error ? { ok: false, error: error.message } : { ok: true }
 }
@@ -48,8 +57,8 @@ export async function sendBroadcastIssue(
     from: FROM,
     subject: issue.subject,
     name: `Nedeľné ticho — ${issue.subject}`,
-    html: renderIssueHtml(issue, NAME_MERGE, avatar),
-    text: renderIssueText(issue, NAME_MERGE),
+    html: renderIssueHtml(issue, NAME_MERGE, avatar, RESEND_UNSUB),
+    text: renderIssueText(issue, NAME_MERGE, RESEND_UNSUB),
     send: true,
   })
   return error ? { ok: false, error: error.message } : { ok: true, id: data?.id }

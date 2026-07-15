@@ -2,6 +2,8 @@
 // veta na riadok, veľa vzduchu, žiadny „dizajn" card. Osobné + lepšie Primary.
 // `body` je plain text (riadky = vzdušné odseky).
 
+import { footerHtml, footerText } from './footer'
+
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
@@ -15,11 +17,16 @@ function lines(text: string): string {
     .join('')
 }
 
-export function renderEmailText(body: string): string {
-  return `${body}\n\n— Dominik\n\nOdpíš mi pokojne — čítam všetko.\nOdhlásiť sa: napíš mi späť na tento mail.`
+export function renderEmailText(body: string, unsubscribeUrl?: string): string {
+  return `${body}\n\n— Dominik\n\n${footerText(unsubscribeUrl)}`
 }
 
-export function renderEmailHtml(body: string, imageUrl?: string, avatarUrl?: string): string {
+export function renderEmailHtml(
+  body: string,
+  imageUrl?: string,
+  avatarUrl?: string,
+  unsubscribeUrl?: string,
+): string {
   const avatar = avatarUrl
     ? `<img src="${esc(avatarUrl)}" alt="Dominik Žažo" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:10px;"/>`
     : ''
@@ -43,10 +50,7 @@ export function renderEmailHtml(body: string, imageUrl?: string, avatarUrl?: str
         </td></tr>
 
         <tr><td style="padding:32px 0 0;">
-          <p style="margin:0;font:400 13px/1.7 Arial,sans-serif;color:#a5a29c;">
-            Odpíš mi pokojne — čítam všetko.<br/>
-            Dostal si to, lebo si sa prihlásil na dominikzazo.sk. Odhlásiť sa? Stačí odpísať.
-          </p>
+          ${footerHtml(unsubscribeUrl)}
         </td></tr>
 
       </table>

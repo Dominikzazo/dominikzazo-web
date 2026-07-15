@@ -55,13 +55,14 @@ describe('dueEnrollments', () => {
 })
 
 describe('advance', () => {
-  it('moves to next email and schedules by delayDays', () => {
+  it('moves to next email and schedules by delayDays, aligned to start of that UTC day', () => {
     const now = new Date('2026-07-14T08:00:00Z')
     const e = { email: 'a@test.sk', sequenceId: 's1', enrolledAt: '', nextEmailIndex: 0, nextSendAt: '', status: 'active' as const }
     const next = advance(e, seq, now)
     expect(next.nextEmailIndex).toBe(1)
     expect(next.status).toBe('active')
-    expect(new Date(next.nextSendAt).getTime()).toBe(now.getTime() + 3 * 86400000)
+    // now + 3 dní = 2026-07-17T08:00Z, zarovnané na 2026-07-17T00:00Z
+    expect(next.nextSendAt).toBe('2026-07-17T00:00:00.000Z')
   })
 
   it('marks done after last email', () => {

@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { renderEmailHtml, renderEmailText } from './render'
+import { unsubscribeUrl } from './unsubscribe'
 
 const FROM =
   process.env.NEWSLETTER_FROM_EMAIL ||
@@ -32,11 +33,16 @@ export async function sendSequenceEmail(
   const resend = resendClient()
   if (!resend || !to) return
   const avatar = process.env.NEWSLETTER_AVATAR_URL || undefined
+  const unsub = unsubscribeUrl(to)
   await resend.emails.send({
     from: FROM,
     to,
     subject,
-    text: renderEmailText(body),
-    html: renderEmailHtml(body, imageUrl, avatar),
+    text: renderEmailText(body, unsub),
+    html: renderEmailHtml(body, imageUrl, avatar, unsub),
+    headers: {
+      'List-Unsubscribe': `<${unsub}>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    },
   })
 }
