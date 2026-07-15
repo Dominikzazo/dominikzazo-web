@@ -1,71 +1,51 @@
-// Branded HTML/text render jedného emailu — prémiový, tichý, s priestorom
-// na dýchanie. Vizuál v duchu dominikzazo.sk: krémová, serif signature,
-// veľa bieleho priestoru hore. `body` je plain text (veta/riadok).
+// Render jedného (drip) emailu — PLAIN, listový štýl (à la Tom Noske):
+// veta na riadok, veľa vzduchu, žiadny „dizajn" card. Osobné + lepšie Primary.
+// `body` je plain text (riadky = vzdušné odseky).
 
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-export function renderEmailText(body: string): string {
-  return `${body}\n\n—\nDominik Žažo\nVedomý kút internetu · dominikzazo.sk\n\nOdhlásiť sa: napíš mi späť na tento mail.`
+function lines(text: string): string {
+  return text
+    .split(/\n+/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((l) => `<p style="margin:0 0 15px;font:400 16px/1.65 Georgia,'Times New Roman',serif;color:#2b2a27;">${esc(l)}</p>`)
+    .join('')
 }
 
-/**
- * @param body plain text (odseky oddelené prázdnym riadkom, riadky = <br/>)
- * @param imageUrl voliteľný obrázok v tele
- * @param avatarUrl voliteľná Dominikova fotka do hlavičky (signature)
- */
+export function renderEmailText(body: string): string {
+  return `${body}\n\n— Dominik\n\nOdpíš mi pokojne — čítam všetko.\nOdhlásiť sa: napíš mi späť na tento mail.`
+}
+
 export function renderEmailHtml(body: string, imageUrl?: string, avatarUrl?: string): string {
-  const paragraphs = body
-    .split(/\n{2,}/)
-    .map(
-      (p) =>
-        `<p style="margin:0 0 20px;font:400 16px/1.75 Georgia,'Times New Roman',serif;color:#2b2a27;">${esc(p).replace(/\n/g, '<br/>')}</p>`,
-    )
-    .join('')
-
-  const bodyImage = imageUrl
-    ? `<img src="${esc(imageUrl)}" alt="" style="width:100%;max-width:100%;border-radius:14px;margin:8px 0 26px;display:block;"/>`
-    : ''
-
   const avatar = avatarUrl
-    ? `<img src="${esc(avatarUrl)}" alt="Dominik Žažo" width="44" height="44" style="width:44px;height:44px;border-radius:50%;object-fit:cover;display:inline-block;vertical-align:middle;margin-right:12px;"/>`
+    ? `<img src="${esc(avatarUrl)}" alt="Dominik Žažo" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:10px;"/>`
+    : ''
+  const image = imageUrl
+    ? `<img src="${esc(imageUrl)}" alt="" style="width:100%;max-width:100%;border-radius:10px;margin:6px 0 20px;display:block;"/>`
     : ''
 
-  return `<!doctype html><html lang="sk"><body style="margin:0;padding:0;background:#f6f4ef;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f4ef;padding:48px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#ffffff;border:1px solid rgba(0,0,0,0.05);border-radius:22px;box-shadow:0 10px 40px rgba(0,0,0,0.05);">
+  return `<!doctype html><html lang="sk"><body style="margin:0;padding:0;background:#ffffff;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
+    <tr><td align="center" style="padding:36px 20px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;text-align:left;">
 
-        <!-- hlavička: priestor na dýchanie + signature -->
-        <tr><td style="padding:44px 44px 8px;">
-          <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-            <td style="vertical-align:middle;">${avatar}</td>
-            <td style="vertical-align:middle;">
-              <div style="font:400 17px/1.2 Georgia,serif;color:#1a1a1a;">Dominik Žažo</div>
-              <div style="font:600 10px/1.4 Arial,sans-serif;letter-spacing:2.5px;text-transform:uppercase;color:#c08a2d;margin-top:3px;">Vedomý kút internetu</div>
-            </td>
-          </tr></table>
+        <tr><td style="padding-bottom:20px;border-bottom:1px solid #eeeae2;">
+          ${avatar}<span style="font:400 16px/1.3 Georgia,serif;color:#1a1a1a;vertical-align:middle;">Dominik Žažo</span>
         </td></tr>
 
-        <!-- jemná linka pod hlavičkou -->
-        <tr><td style="padding:22px 44px 0;">
-          <div style="height:1px;background:linear-gradient(to right, rgba(0,0,0,0.08), rgba(0,0,0,0));"></div>
+        <tr><td style="padding-top:28px;">
+          ${image}
+          ${lines(body)}
+          <p style="margin:24px 0 0;font:italic 18px/1.3 Georgia,serif;color:#b07d1e;">— Dominik</p>
         </td></tr>
 
-        <!-- telo -->
-        <tr><td style="padding:30px 44px 8px;">
-          ${bodyImage}
-          ${paragraphs}
-        </td></tr>
-
-        <!-- podpis -->
-        <tr><td style="padding:14px 44px 40px;">
-          <div style="height:1px;background:rgba(0,0,0,0.06);margin:0 0 22px;"></div>
-          <p style="margin:0;font:italic 20px/1.3 Georgia,serif;color:#b07d1e;">— Dominik</p>
-          <p style="margin:16px 0 0;font:400 12px/1.7 Arial,sans-serif;color:#a5a29c;">
-            Dostal si to, lebo si sa prihlásil na dominikzazo.sk.<br/>
-            Odhlásiť sa? Stačí odpísať na tento mail.
+        <tr><td style="padding:32px 0 0;">
+          <p style="margin:0;font:400 13px/1.7 Arial,sans-serif;color:#a5a29c;">
+            Odpíš mi pokojne — čítam všetko.<br/>
+            Dostal si to, lebo si sa prihlásil na dominikzazo.sk. Odhlásiť sa? Stačí odpísať.
           </p>
         </td></tr>
 

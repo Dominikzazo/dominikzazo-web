@@ -146,21 +146,25 @@ export default function WeeklyComposer({ adminEmail }: { adminEmail: string }) {
         )}
       </div>
 
-      {/* Živý náhľad */}
+      {/* Živý náhľad — plain listový štýl (ako reálny email) */}
       <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: COLORS.textMuted }}>Náhľad</p>
-      <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 18, padding: '26px 26px', marginBottom: 20, boxShadow: '0 8px 30px rgba(0,0,0,0.05)' }}>
-        <div style={{ fontFamily: 'var(--font-lora), serif', fontSize: 16, color: '#1a1a1a' }}>Dominik Žažo</div>
-        <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c08a2d', marginTop: 3 }}>Nedeľné ticho</div>
-        <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '18px 0' }} />
-        <p style={{ margin: 0, fontFamily: 'var(--font-lora), serif', fontSize: 15, lineHeight: 1.7, color: '#2b2a27' }}>Ahoj Peter,</p>
-        {issue.intro && <p style={{ margin: '14px 0 0', fontFamily: 'var(--font-lora), serif', fontSize: 15, lineHeight: 1.7, color: '#2b2a27' }}>{issue.intro}</p>}
+      <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, padding: '30px 28px', marginBottom: 20 }}>
+        <div style={{ paddingBottom: 16, borderBottom: '1px solid #eeeae2' }}>
+          <span style={{ fontFamily: 'var(--font-lora), serif', fontSize: 16, color: '#1a1a1a' }}>Dominik Žažo</span>
+          <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#b8b3a8', marginLeft: 8 }}>Nedeľné ticho</span>
+        </div>
+        <p style={{ margin: '22px 0 20px', fontFamily: 'var(--font-lora), serif', fontSize: 15.5, lineHeight: 1.65, color: '#2b2a27' }}>Ahoj Peter,</p>
+        {issue.intro && <p style={{ margin: '0 0 22px', fontFamily: 'var(--font-lora), serif', fontSize: 15.5, lineHeight: 1.65, color: '#2b2a27' }}>{issue.intro}</p>}
         {([['myšlienka', issue.thought], ['krok', issue.step], ['otázka', issue.question]] as const).map(([lbl, val]) => (
-          <div key={lbl} style={{ marginTop: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: BTC }}>1 · {lbl}</div>
-            <p style={{ margin: '4px 0 0', fontFamily: 'var(--font-lora), serif', fontSize: 15, lineHeight: 1.7, color: val ? '#2b2a27' : '#c9c6bf' }}>{val || '…'}</p>
+          <div key={lbl} style={{ marginBottom: 22 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#a68a4f', marginBottom: 6 }}>1 · {lbl}</div>
+            {(val || '…').split(/\n+/).filter(Boolean).map((line, i) => (
+              <p key={i} style={{ margin: '0 0 8px', fontFamily: 'var(--font-lora), serif', fontSize: 15.5, lineHeight: 1.65, color: val ? '#2b2a27' : '#c9c6bf' }}>{line}</p>
+            ))}
           </div>
         ))}
-        <p style={{ margin: '22px 0 0', fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 17, color: '#b07d1e' }}>— Dominik</p>
+        <p style={{ margin: '24px 0 0', fontFamily: 'var(--font-lora), serif', fontSize: 15.5, color: '#2b2a27' }}>Till next Sunday,</p>
+        <p style={{ margin: '2px 0 0', fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 17, color: '#b07d1e' }}>— Dominik</p>
       </div>
 
       {/* Odoslanie */}
