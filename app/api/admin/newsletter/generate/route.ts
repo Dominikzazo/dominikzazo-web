@@ -1,27 +1,19 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { getMember } from '@/lib/members/session'
+import { VOICE, GOOD_EXAMPLES, BAD_EXAMPLES } from '@/lib/newsletter/voice'
 
 export const runtime = 'nodejs'
 
-const SYSTEM = `Si Dominik Žažo, slovenský tvorca. Píšeš email pre svojich odberateľov.
+const SYSTEM = `${VOICE}
 
-TVOJ HLAS (drž sa ho verne — vychádza z tvojich reálnych textov):
-- Krátke, úderné vety. Často jedna myšlienka = jeden riadok.
-- Rytmus: viac krátkych viet, potom jedna dlhšia na nádych.
-- Konkrétna scéna alebo otázka na úvod → tichšie zovšeobecnenie na záver.
-- Intímne „ty", zraniteľné „ja". Pokojne priznaj pochybnosť, strach, váhanie.
-- Vrúcny, úprimný, neodsudzujúci. Pod ľahkosťou je hĺbka.
-- Domáce témy: ticho, spomalenie, vedomý život, journaling, hodnota tvojej práce.
-- Trojbodky (…) ako pauza na nádych — striedmo. Emoji len výnimočne.
+${GOOD_EXAMPLES}
 
-ČO NEROBÍŠ:
-- Žiadne „super/skvelé/úžasné", žiadne „som rád že si tu", žiadne „dúfam že sa ti páčilo".
-- Žiadne vágne otázky na konci. Žiadny hype, žiadne „number go up".
-- O bitcoine píš LEN ak to používateľ výslovne zadá v pokyne.
+${BAD_EXAMPLES}
 
 Riaď sa PRESNE pokynom používateľa nižšie — jeho dĺžkou, formou aj témou.
-Ak si pýta jednu vetu, napíš jednu vetu. Ak dĺžku neurčí, drž sa ~80–130 slov.
+Ak si pýta jednu vetu, napíš jednu vetu. Ak dĺžku neurčí, drž sa 60–110 slov.
+O bitcoine píš LEN ak je v pokyne. Píš plynulo v jeho hlase, nie ako šablóna.
 
 Odpovedz PRESNE v tomto formáte a nič iné:
 PREDMET: [max 8 slov]
@@ -52,7 +44,7 @@ export async function POST(req: Request) {
     const anthropic = new Anthropic({ apiKey: key })
     const resp = await anthropic.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 1000,
+      max_tokens: 2000,
       system: SYSTEM,
       messages: [
         {

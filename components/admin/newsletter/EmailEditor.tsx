@@ -1,6 +1,5 @@
 'use client'
 import { useRef, useState } from 'react'
-import { upload } from '@vercel/blob/client'
 import type { SequenceEmail } from '@/lib/newsletter/types'
 import { Btn, BTC, BTC_LIGHT, BTC_BORDER, COLORS, inputStyle, labelStyle } from './shared'
 
@@ -71,21 +70,13 @@ export default function EmailEditor({
     setImgErr('')
     setImgUploading(true)
     try {
-      // Rovnaký mechanizmus ako components/admin/FileUploadForm.tsx —
-      // priamy upload z prehliadača do Vercel Blobu cez token z /api/admin/upload.
-      // Na rozdiel od FileUploadForm (private, členský obsah) tu volíme 'public',
-      // lebo obrázok musí byť načítateľný priamo v emailovom kliente príjemcu.
-      // Očisti názov: odstráň diakritiku, medzery a špeciálne znaky,
-      // ktoré vedia rozbiť Blob pathname/URL.
-      const safeName = file.name
-        .normalize('NFD')
-        .replace(/[^a-zA-Z0-9._-]/g, '-')
-        .replace(/-+/g, '-')
-      const blob = await upload(`newsletter/${Date.now()}-${safeName}`, file, {
-        access: 'public',
-        handleUploadUrl: '/api/admin/upload',
-      })
-      setImageUrl(blob.url)
+      // Server-side upload do public Blobu (obrázok musí byť verejný pre email).
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/admin/newsletter/upload-image', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok || !data.url) throw new Error(data.error || 'Nahrávanie zlyhalo.')
+      setImageUrl(data.url)
     } catch (err) {
       setImgErr((err as Error).message || 'Nahrávanie zlyhalo.')
     } finally {
