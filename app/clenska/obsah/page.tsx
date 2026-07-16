@@ -23,13 +23,9 @@ function skDate(iso: string) {
 function ItemCard({ item }: { item: PremiumItem }) {
   const meta = TYPE_META[item.type]
   const date = skDate(item.updatedAt)
-  const href =
-    item.type === 'file'
-      ? `/clenska/media/${item.id}`
-      : item.type === 'link' && item.url
-        ? item.url
-        : `/clenska/obsah/${item.id}`
-  const external = item.type !== 'article'
+  // Všetko ide na vlastnú stránku — tá sa postará o prehrávač/embed.
+  // (Predtým súbory a odkazy odchádzali do cudzieho tabu.)
+  const href = `/clenska/obsah/${item.id}`
 
   const inner = (
     <div className="flex items-start gap-4">
@@ -48,7 +44,6 @@ function ItemCard({ item }: { item: PremiumItem }) {
       <div className="min-w-0 flex-1">
         <h3 className="kruh-essay-title font-lora text-[19px] sm:text-[21px] leading-[1.3] mb-1.5 text-[#1a1a1a]">
           {item.title}
-          {item.type !== 'article' && <span className="ml-1.5 text-[15px] opacity-60">↗</span>}
         </h3>
         {item.excerpt && (
           <p className="mb-2 text-[14.5px] leading-[1.65] text-[#666]">{item.excerpt}</p>
@@ -66,11 +61,7 @@ function ItemCard({ item }: { item: PremiumItem }) {
   const cls =
     'kruh-perk block rounded-2xl border border-black/[0.07] bg-white/80 px-5 py-5 sm:px-6 no-underline'
 
-  return external ? (
-    <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
-      {inner}
-    </a>
-  ) : (
+  return (
     <Link href={href} className={cls}>
       {inner}
     </Link>

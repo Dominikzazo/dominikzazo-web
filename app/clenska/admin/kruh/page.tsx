@@ -1,17 +1,111 @@
 import Link from 'next/link'
 import { listCategories, listItems } from '@/lib/cms/premium'
-import { addCategory, removeCategory, addItem, removeItem, togglePublish } from './actions'
+import { addCategory, removeCategory, saveItem, removeItem, togglePublish } from './actions'
 import FileUploadForm from '@/components/admin/FileUploadForm'
 import SaveButton from '@/components/admin/SaveButton'
+import type { PremiumItem } from '@/lib/cms/types'
 
 const input =
   'w-full rounded-lg border border-black/[0.12] bg-white px-3 py-2 text-[14px] outline-none focus:border-[#c9a96e]'
 const btnGold =
   'rounded-full bg-[#c9a96e] px-5 py-2 text-[13.5px] font-medium text-[#1a1a1a] hover:bg-[#b8985d]'
 
-export default async function KruhAdmin() {
-  const [cats, items] = await Promise.all([listCategories(), listItems()])
+const TYPE_LABEL: Record<PremiumItem['type'], string> = {
+  article: 'esej (text)',
+  file: 'súbor',
+  link: 'odkaz',
+}
+
+/** Formulár na pridanie aj úpravu. `item` = režim úpravy (typ sa nemení). */
+function ItemForm({ item, cats }: { item?: PremiumItem; cats: { id: string; name: string }[] }) {
+  const editing = Boolean(item)
+  return (
+    <form
+      id="form"
+      action={saveItem}
+      className="flex flex-col gap-3 rounded-xl border border-black/[0.08] bg-white/50 p-5"
+      style={editing ? { borderColor: 'rgba(201,169,110,0.5)' } : undefined}
+    >
+      <div className="flex items-center justify-between">
+        <h3 className="font-lora text-[16px]">
+          {editing ? `Upraviť — ${TYPE_LABEL[item!.type]}` : 'Pridať položku'}
+        </h3>
+        {editing && (
+          <Link href="/clenska/admin/kruh" className="text-[12px] text-[#888] hover:underline">
+            zrušiť
+          </Link>
+        )}
+      </div>
+
+      {editing && <input type="hidden" name="id" value={item!.id} />}
+
+      <input name="title" placeholder="Názov" required defaultValue={item?.title} className={input} />
+
+      <div className="flex gap-3">
+        <select name="categoryId" defaultValue={item?.categoryId} className={input}>
+          {cats.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        {/* Typ sa dá zvoliť len pri vytváraní — pri úprave by rozbil médiá */}
+        {!editing && (
+          <select name="type" className={input} defaultValue="article">
+            <option value="article">Esej (text)</option>
+            <option value="link">Odkaz (video/PDF/URL)</option>
+          </select>
+        )}
+      </div>
+
+      <input
+        name="excerpt"
+        placeholder="Krátky popis (do zoznamu)"
+        defaultValue={item?.excerpt}
+        className={input}
+      />
+
+      {/* Pri úprave ukáž len pole, ktoré k typu patrí */}
+      {(!editing || item!.type === 'article') && (
+        <textarea
+          name="body"
+          placeholder="Text eseje (ak je to esej)"
+          rows={editing ? 14 : 5}
+          defaultValue={item?.body}
+          className={input}
+        />
+      )}
+      {(!editing || item!.type === 'link') && (
+        <input
+          name="url"
+          placeholder="URL (YouTube/Vimeo sa prehrá priamo na stránke)"
+          defaultValue={item?.url}
+          className={input}
+        />
+      )}
+      {editing && item!.type === 'file' && (
+        <p className="text-[12px] text-[#999]">
+          Súbor: {item!.fileName ?? '—'} (samotný súbor sa nedá vymeniť — nahraj nový a starý zmaž)
+        </p>
+      )}
+
+      <label className="flex items-center gap-2 text-[13px] text-[#666]">
+        <input type="checkbox" name="published" defaultChecked={item?.published} /> publikovať
+      </label>
+
+      <SaveButton>{editing ? 'Uložiť zmeny' : '+ Pridať položku'}</SaveButton>
+    </form>
+  )
+}
+
+export default async function KruhAdmin({
+  searchParams,
+}: {
+  searchParams: Promise<{ edit?: string }>
+}) {
+  const [{ edit }, cats, items] = await Promise.all([searchParams, listCategories(), listItems()])
   const catName = (id: string) => cats.find((c) => c.id === id)?.name ?? '—'
+  const editing = edit ? items.find((i) => i.id === edit) : undefined
 
   return (
     <main className="page-pad mx-auto flex max-w-2xl flex-col">
@@ -57,7 +151,12 @@ export default async function KruhAdmin() {
           {items.map((it) => (
             <div
               key={it.id}
-              className="flex items-center justify-between gap-3 rounded-lg border border-black/[0.07] bg-white/60 px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-lg border px-4 py-3"
+              style={
+                editing?.id === it.id
+                  ? { borderColor: 'rgba(201,169,110,0.6)', background: 'rgba(201,169,110,0.07)' }
+                  : { borderColor: 'rgba(0,0,0,0.07)', background: 'rgba(255,255,255,0.6)' }
+              }
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -73,6 +172,12 @@ export default async function KruhAdmin() {
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-3">
+                <Link
+                  href={`/clenska/admin/kruh?edit=${it.id}#form`}
+                  className="text-[12px] text-[#a8843f] hover:underline"
+                >
+                  upraviť
+                </Link>
                 <form action={togglePublish}>
                   <input type="hidden" name="id" value={it.id} />
                   <button className="text-[12px] text-[#a8843f] hover:underline">
@@ -88,34 +193,15 @@ export default async function KruhAdmin() {
           ))}
         </div>
 
-        {/* Pridať položku */}
+        {/* Pridať / upraviť položku */}
         {cats.length === 0 ? (
           <p className="text-[13px] text-[#999]">Najprv pridaj kategóriu, potom môžeš pridávať obsah.</p>
         ) : (
-          <form action={addItem} className="flex flex-col gap-3 rounded-xl border border-black/[0.08] bg-white/50 p-5">
-            <h3 className="font-lora text-[16px]">Pridať položku</h3>
-            <input name="title" placeholder="Názov" required className={input} />
-            <div className="flex gap-3">
-              <select name="categoryId" className={input}>
-                {cats.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <select name="type" className={input} defaultValue="article">
-                <option value="article">Esej (text)</option>
-                <option value="link">Odkaz (video/PDF/URL)</option>
-              </select>
-            </div>
-            <input name="excerpt" placeholder="Krátky popis (do zoznamu)" className={input} />
-            <textarea name="body" placeholder="Text eseje (ak je to esej)" rows={5} className={input} />
-            <input name="url" placeholder="URL (ak je to odkaz na video/PDF)" className={input} />
-            <label className="flex items-center gap-2 text-[13px] text-[#666]">
-              <input type="checkbox" name="published" /> publikovať hneď
-            </label>
-            <SaveButton>+ Pridať položku</SaveButton>
-          </form>
+          <ItemForm
+            key={editing?.id ?? 'new'}
+            item={editing}
+            cats={cats.map((c) => ({ id: c.id, name: c.name }))}
+          />
         )}
       </section>
 
