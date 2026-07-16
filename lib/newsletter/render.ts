@@ -3,6 +3,7 @@
 // `body` je plain text (riadky = vzdušné odseky).
 
 import { footerHtml, footerText } from './footer'
+import { linkifyHtml, linkifyText } from './linkify'
 
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -13,12 +14,17 @@ function lines(text: string): string {
     .split(/\n+/)
     .map((l) => l.trim())
     .filter(Boolean)
-    .map((l) => `<p style="margin:0 0 15px;font:400 16px/1.65 Georgia,'Times New Roman',serif;color:#2b2a27;">${esc(l)}</p>`)
+    // linkifyHtml escapuje + spraví z URL / [text](url) skutočné <a href>
+    .map((l) => `<p style="margin:0 0 15px;font:400 16px/1.65 Georgia,'Times New Roman',serif;color:#2b2a27;">${linkifyHtml(l)}</p>`)
     .join('')
 }
 
 export function renderEmailText(body: string, unsubscribeUrl?: string): string {
-  return `${body}\n\n— Dominik\n\n${footerText(unsubscribeUrl)}`
+  const plain = body
+    .split('\n')
+    .map((l) => linkifyText(l))
+    .join('\n')
+  return `${plain}\n\n— Dominik\n\n${footerText(unsubscribeUrl)}`
 }
 
 export function renderEmailHtml(

@@ -14,7 +14,7 @@ export function footerHtml(unsubUrl?: string): string {
     : 'Odhlásiť sa? Stačí odpísať na tento mail.'
   return `<p style="margin:0;font:400 13px/1.7 Arial,sans-serif;color:#a5a29c;">
       Odpíš mi pokojne — čítam všetko.<br/>
-      Dostal si tento email, lebo si sa prihlásil na dominikzazo.sk. ${unsub}<br/>
+      Dostal si tento email, lebo si sa prihlásil na <a href="https://dominikzazo.sk" style="color:#a5a29c;text-decoration:underline;">dominikzazo.sk</a>. ${unsub}<br/>
       Dominik Žažo${POSTAL ? ` · ${esc(POSTAL)}` : ''}
     </p>`
 }
