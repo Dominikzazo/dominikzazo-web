@@ -496,6 +496,22 @@ export default function NewsletterAdmin() {
         <span style={{ color: BTC, fontSize: 18 }}>→</span>
       </a>
 
+      <a
+        href="/admin/newsletter/odberatelia"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none',
+          background: COLORS.surface2, border: `0.5px solid ${COLORS.border}`, borderRadius: 14,
+          padding: '16px 18px', marginBottom: 18,
+        }}
+      >
+        <span style={{ fontSize: 24 }}>👥</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textPrimary }}>Odberatelia</div>
+          <div style={{ fontSize: 12, color: COLORS.textSecondary, marginTop: 2 }}>Kto je v sekvencii, kde sa nachádza a kedy mu ide ďalší mail</div>
+        </div>
+        <span style={{ color: COLORS.textMuted, fontSize: 18 }}>→</span>
+      </a>
+
       {loadErr && <p style={{ margin: '0 0 14px', fontSize: 12, color: COLORS.textDanger }}>{loadErr}</p>}
       {saveState === 'saving' && <p style={{ margin: '0 0 14px', fontSize: 12, color: COLORS.textMuted }}>Ukladám…</p>}
       {saveState === 'saved' && <p style={{ margin: '0 0 14px', fontSize: 12, color: COLORS.textSuccess }}>✓ Uložené</p>}

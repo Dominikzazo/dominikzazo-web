@@ -34,6 +34,7 @@ export async function readData(): Promise<NewsletterData> {
     return {
       sequences: data.sequences ?? [],
       enrollments: data.enrollments ?? [],
+      events: data.events ?? [],
     }
   } catch {
     return EMPTY_NEWSLETTER_DATA

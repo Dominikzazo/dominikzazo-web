@@ -20,7 +20,7 @@ export interface Sequence {
   emails: SequenceEmail[]
 }
 
-export type EnrollmentStatus = 'active' | 'done' | 'unsubscribed'
+export type EnrollmentStatus = 'active' | 'done' | 'unsubscribed' | 'bounced'
 
 export interface Enrollment {
   email: string
@@ -34,9 +34,33 @@ export interface Enrollment {
   consentIp?: string // IP z potvrdzovacieho requestu (GDPR dôkaz)
 }
 
+// Engagement event log — append-only. Zvláda drip aj broadcast; základ pre
+// fázu 2 (vetvenie podľa open/click). Napĺňa ho Resend webhook (Deploy 2).
+export type EngagementType =
+  | 'sent'
+  | 'delivered'
+  | 'opened'
+  | 'clicked'
+  | 'bounced'
+  | 'complained'
+
+export interface EngagementEvent {
+  email: string
+  type: EngagementType
+  source: 'drip' | 'broadcast'
+  ref?: string // drip: `${sequenceId}:${emailIndex}` · broadcast: broadcastId
+  at: string // ISO
+  resendId?: string // Resend data.email_id (dedup/debug)
+}
+
 export interface NewsletterData {
   sequences: Sequence[]
   enrollments: Enrollment[]
+  events: EngagementEvent[]
 }
 
-export const EMPTY_NEWSLETTER_DATA: NewsletterData = { sequences: [], enrollments: [] }
+export const EMPTY_NEWSLETTER_DATA: NewsletterData = {
+  sequences: [],
+  enrollments: [],
+  events: [],
+}

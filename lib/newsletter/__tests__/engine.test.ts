@@ -11,7 +11,7 @@ const seq: Sequence = {
 }
 
 function baseData(): NewsletterData {
-  return { sequences: [seq], enrollments: [] }
+  return { sequences: [seq], enrollments: [], events: [] }
 }
 
 describe('enroll', () => {
@@ -32,7 +32,7 @@ describe('enroll', () => {
   })
 
   it('does nothing if no active sequence for trigger', () => {
-    const data: NewsletterData = { sequences: [{ ...seq, active: false }], enrollments: [] }
+    const data: NewsletterData = { sequences: [{ ...seq, active: false }], enrollments: [], events: [] }
     const d = enroll(data, 'x@test.sk', 'X', 'signup', new Date())
     expect(d.enrollments).toHaveLength(0)
   })
@@ -66,6 +66,7 @@ describe('dueEnrollments', () => {
         { email: 'b@test.sk', sequenceId: 's1', enrolledAt: '', nextEmailIndex: 1, nextSendAt: '2026-07-20T07:00:00Z', status: 'active' },
         { email: 'c@test.sk', sequenceId: 's1', enrolledAt: '', nextEmailIndex: 0, nextSendAt: '2026-07-14T07:00:00Z', status: 'done' },
       ],
+      events: [],
     }
     const due = dueEnrollments(data, now)
     expect(due.map(e => e.email)).toEqual(['a@test.sk'])
