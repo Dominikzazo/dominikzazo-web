@@ -40,7 +40,10 @@ export async function GET(req: Request) {
       continue
     }
     try {
-      await sendSequenceEmail(enrollment.email, email.subject, email.body, email.imageUrl)
+      await sendSequenceEmail(enrollment.email, email.subject, email.body, email.imageUrl, {
+        seq: seq.id,
+        idx: enrollment.nextEmailIndex,
+      })
       const advanced = advance(enrollment, seq, now)
       data = {
         ...data,

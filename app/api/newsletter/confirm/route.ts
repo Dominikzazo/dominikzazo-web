@@ -68,7 +68,10 @@ export async function GET(req: Request) {
       const seq = data.sequences.find((s) => s.id === mine.sequenceId)
       const first = seq?.emails[mine.nextEmailIndex]
       if (seq && first) {
-        await sendSequenceEmail(email, first.subject, first.body, first.imageUrl)
+        await sendSequenceEmail(email, first.subject, first.body, first.imageUrl, {
+          seq: seq.id,
+          idx: mine.nextEmailIndex,
+        })
         const advanced = advance(mine, seq, now)
         data = { ...data, enrollments: data.enrollments.map((e) => (e === mine ? advanced : e)) }
       }

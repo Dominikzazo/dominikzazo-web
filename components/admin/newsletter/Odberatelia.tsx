@@ -1,9 +1,19 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
-import type { Sequence, Enrollment, EnrollmentStatus } from '@/lib/newsletter/types'
+import type { Sequence, Enrollment, EnrollmentStatus, NewsletterData } from '@/lib/newsletter/types'
+import { engagementFor } from '@/lib/newsletter/engagement'
 import { COLORS, BTC } from './shared'
 
-type Data = { sequences: Sequence[]; enrollments: Enrollment[] }
+type Data = NewsletterData
+
+// Engagement sa vzťahuje na posledný ODOSLANÝ mail sekvencie
+// (nextEmailIndex ukazuje na ďalší v poradí). Nič odoslané → null.
+function engagementOf(data: Data | null, e: Enrollment) {
+  if (!data) return null
+  const lastIdx = e.nextEmailIndex - 1
+  if (lastIdx < 0) return null
+  return engagementFor(data, e.email, `${e.sequenceId}:${lastIdx}`)
+}
 
 // „o N dní" pre ďalší mail — len pre aktívne enrollmenty, inak „—".
 function relativeNext(nextSendAt: string, status: EnrollmentStatus): string {
@@ -46,7 +56,15 @@ function Chip({ label, value, bg, fg }: { label?: string; value: string; bg?: st
   )
 }
 
-function Row({ e, seq }: { e: Enrollment; seq?: Sequence }) {
+function Row({
+  e,
+  seq,
+  engagement,
+}: {
+  e: Enrollment
+  seq?: Sequence
+  engagement: { opened: boolean; clicked: boolean } | null
+}) {
   const total = seq?.emails.length ?? 0
   const received = Math.min(e.nextEmailIndex, total)
   const status = STATUS_META[e.status]
@@ -94,6 +112,22 @@ function Row({ e, seq }: { e: Enrollment; seq?: Sequence }) {
         <Chip value={seq?.name || 'neznáma sekvencia'} />
         <Chip label="postup" value={`${received}/${total}`} />
         <Chip label="ďalší" value={relativeNext(e.nextSendAt, e.status)} />
+        {engagement && (
+          <>
+            <Chip
+              label="otvoril"
+              value={engagement.opened ? '✓' : '—'}
+              bg={engagement.opened ? COLORS.bgSuccess : undefined}
+              fg={engagement.opened ? COLORS.textSuccess : undefined}
+            />
+            <Chip
+              label="klikol"
+              value={engagement.clicked ? '✓' : '—'}
+              bg={engagement.clicked ? COLORS.bgSuccess : undefined}
+              fg={engagement.clicked ? COLORS.textSuccess : undefined}
+            />
+          </>
+        )}
       </div>
     </div>
   )
@@ -107,7 +141,13 @@ export default function Odberatelia({ initialData }: { initialData?: Data }) {
     if (initialData) return
     fetch('/api/admin/newsletter')
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d: Data) => setData({ sequences: d.sequences || [], enrollments: d.enrollments || [] }))
+      .then((d: Data) =>
+        setData({
+          sequences: d.sequences || [],
+          enrollments: d.enrollments || [],
+          events: d.events || [],
+        }),
+      )
       .catch(() => setErr(true))
   }, [initialData])
 
@@ -171,12 +211,20 @@ export default function Odberatelia({ initialData }: { initialData?: Data }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {rows.map((e, i) => (
-          <Row key={`${e.email}-${e.sequenceId}-${i}`} e={e} seq={seqById.get(e.sequenceId)} />
+          <Row
+            key={`${e.email}-${e.sequenceId}-${i}`}
+            e={e}
+            seq={seqById.get(e.sequenceId)}
+            engagement={engagementOf(data, e)}
+          />
         ))}
       </div>
 
       <p style={{ fontSize: 12, color: COLORS.textMuted, marginTop: 24, lineHeight: 1.6 }}>
-        Stĺpce „otvoril?" a „klikol?" pribudnú s trackingom (Resend webhook). Farba <span style={{ color: BTC }}>oranžová</span> = drip beží.
+        „Otvoril/klikol" sa vzťahuje na <strong>posledný odoslaný</strong> mail sekvencie. Email vie
+        merať len otvorenie (pixel) a klik — nie scroll ani to, kam sa človek dočítal. Otvorenie je
+        nepresné (Gmail občas pixel prednačíta, blokované obrázky ho zas nezachytia);{' '}
+        <strong>klik je spoľahlivejší signál</strong>. Farba <span style={{ color: BTC }}>oranžová</span> = drip beží.
       </p>
     </div>
   )

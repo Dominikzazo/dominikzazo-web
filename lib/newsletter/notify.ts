@@ -50,6 +50,7 @@ export async function sendSequenceEmail(
   subject: string,
   body: string,
   imageUrl?: string,
+  ref?: { seq: string; idx: number },
 ): Promise<void> {
   const resend = resendClient()
   if (!resend || !to) return
@@ -65,5 +66,16 @@ export async function sendSequenceEmail(
       'List-Unsubscribe': `<${unsub}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
     },
+    // Tagy sa vracajú vo webhook payloade → vieme open/klik priradiť ku
+    // konkrétnemu mailu sekvencie (viď lib/newsletter/engagement.ts).
+    ...(ref
+      ? {
+          tags: [
+            { name: 'source', value: 'drip' },
+            { name: 'seq', value: ref.seq },
+            { name: 'idx', value: String(ref.idx) },
+          ],
+        }
+      : {}),
   })
 }

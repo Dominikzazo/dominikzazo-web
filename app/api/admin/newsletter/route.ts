@@ -13,7 +13,11 @@ async function requireAdmin(): Promise<boolean> {
 export async function GET() {
   if (!(await requireAdmin())) return NextResponse.json({ error: 'forbidden' }, { status: 403 })
   const data = await readData()
-  return NextResponse.json({ sequences: data.sequences, enrollments: data.enrollments })
+  return NextResponse.json({
+    sequences: data.sequences,
+    enrollments: data.enrollments,
+    events: data.events,
+  })
 }
 
 export async function PUT(req: Request) {
