@@ -1,6 +1,12 @@
 import { Resend } from 'resend'
 import { renderEmailHtml, renderEmailText } from './render'
 import { unsubscribeUrl } from './unsubscribe'
+import {
+  confirmUrl,
+  renderConfirmHtml,
+  renderConfirmText,
+  CONFIRM_SUBJECT,
+} from './confirm'
 
 const FROM =
   process.env.NEWSLETTER_FROM_EMAIL ||
@@ -21,6 +27,21 @@ export async function addToNewsletterAudience(email: string, firstName?: string)
     firstName: firstName || undefined,
     unsubscribed: false,
     audienceId,
+  })
+}
+
+// Double opt-in: pošle potvrdzovací mail. Transakčný (resend.emails.send →
+// Primary tab). Bez List-Unsubscribe hlavičiek — človek ešte nie je odberateľ.
+export async function sendConfirmEmail(to: string, firstName?: string): Promise<void> {
+  const resend = resendClient()
+  if (!resend || !to) return
+  const url = confirmUrl(to, firstName)
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: CONFIRM_SUBJECT,
+    text: renderConfirmText(url, firstName),
+    html: renderConfirmHtml(url, firstName),
   })
 }
 

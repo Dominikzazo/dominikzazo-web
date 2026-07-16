@@ -36,6 +36,24 @@ describe('enroll', () => {
     const d = enroll(data, 'x@test.sk', 'X', 'signup', new Date())
     expect(d.enrollments).toHaveLength(0)
   })
+
+  it('records consent metadata (at + ip) when provided', () => {
+    const now = new Date('2026-07-14T08:00:00Z')
+    const d = enroll(baseData(), 'x@test.sk', 'X', 'signup', now, {
+      at: '2026-07-14T08:00:00.000Z',
+      ip: '1.2.3.4',
+    })
+    expect(d.enrollments[0]).toMatchObject({
+      consentAt: '2026-07-14T08:00:00.000Z',
+      consentIp: '1.2.3.4',
+    })
+  })
+
+  it('leaves consent fields undefined when no consent is passed (back-compat)', () => {
+    const d = enroll(baseData(), 'x@test.sk', 'X', 'signup', new Date())
+    expect(d.enrollments[0].consentAt).toBeUndefined()
+    expect(d.enrollments[0].consentIp).toBeUndefined()
+  })
 })
 
 describe('dueEnrollments', () => {

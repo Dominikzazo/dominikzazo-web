@@ -30,6 +30,8 @@ export interface Enrollment {
   nextEmailIndex: number // index ďalšieho emailu na odoslanie
   nextSendAt: string // ISO — kedy poslať nextEmailIndex
   status: EnrollmentStatus
+  consentAt?: string // ISO — kedy potvrdil double opt-in (GDPR dôkaz)
+  consentIp?: string // IP z potvrdzovacieho requestu (GDPR dôkaz)
 }
 
 export interface NewsletterData {

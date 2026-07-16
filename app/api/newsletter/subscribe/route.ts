@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
-import { readData, writeData } from '@/lib/newsletter/store'
-import { enroll, advance } from '@/lib/newsletter/engine'
-import { addToNewsletterAudience, sendSequenceEmail } from '@/lib/newsletter/notify'
-import { pingDiscord } from '@/lib/members/notify'
+import { sendConfirmEmail } from '@/lib/newsletter/notify'
 
 export const runtime = 'nodejs'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+// Double opt-in: subscribe NIČ neukladá ani neenrolluje. Iba pošle potvrdzovací
+// mail s podpísaným linkom. Odberateľom sa človek stáva až v /confirm.
 export async function POST(req: Request) {
   let payload: { email?: string; firstName?: string; website?: string }
   try {
@@ -26,26 +25,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    await addToNewsletterAudience(email, firstName)
-
-    const now = new Date()
-    let data = enroll(await readData(), email, firstName, 'signup', now)
-
-    // Ak sa práve vytvoril enrollment splatný hneď (email #0), pošli ho hneď
-    // (welcome nečaká na cron) a posuň ho.
-    const mine = data.enrollments.find((e) => e.email === email && e.status === 'active')
-    if (mine && new Date(mine.nextSendAt).getTime() <= now.getTime()) {
-      const seq = data.sequences.find((s) => s.id === mine.sequenceId)
-      const first = seq?.emails[mine.nextEmailIndex]
-      if (seq && first) {
-        await sendSequenceEmail(email, first.subject, first.body, first.imageUrl)
-        const advanced = advance(mine, seq, now)
-        data = { ...data, enrollments: data.enrollments.map((e) => (e === mine ? advanced : e)) }
-      }
-    }
-
-    await writeData(data)
-    await pingDiscord(email, firstName || '')
+    await sendConfirmEmail(email, firstName)
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('newsletter subscribe error', err)

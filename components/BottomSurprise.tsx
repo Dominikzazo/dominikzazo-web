@@ -123,10 +123,10 @@ export default function BottomSurprise() {
             className="animate-count-pop"
             style={{ fontFamily: 'var(--font-caveat), cursive', fontSize: 52, color: '#1a1a1a', marginBottom: 12, textAlign: 'center', lineHeight: 1.1 }}
           >
-            Ďakujem! 💗
+            Skoro tam! 💗
           </h2>
           <p style={{ fontFamily: 'var(--font-caveat), cursive', fontSize: 24, color: '#888', textAlign: 'center' }}>
-            Teraz ostaneme v kontakte. Pomaly, ako to tu máme radi. 🌿
+            Skontroluj schránku a potvrď prihlásenie. Pomaly, ako to tu máme radi. 🌿
           </p>
         </>
       )}

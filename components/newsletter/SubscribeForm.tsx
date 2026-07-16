@@ -36,8 +36,8 @@ export default function SubscribeForm() {
   if (status === 'ok') {
     return (
       <div className="py-5">
-        <p className="m-0 font-lora text-[19px] text-[#1a1a1a]">Skontroluj schránku. 🤍</p>
-        <p className="mt-1.5 text-[14px] text-[#666]">Práve som ti poslal prvý mail.</p>
+        <p className="m-0 font-lora text-[19px] text-[#1a1a1a]">Skoro! Skontroluj schránku. 🤍</p>
+        <p className="mt-1.5 text-[14px] text-[#666]">Poslal som ti potvrdzovací mail — klikni v ňom a si dnu.</p>
       </div>
     )
   }

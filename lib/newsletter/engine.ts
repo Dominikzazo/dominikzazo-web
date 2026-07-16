@@ -10,6 +10,7 @@ export function enroll(
   firstName: string | undefined,
   trigger: SequenceTrigger,
   now: Date = new Date(),
+  consent?: { at: string; ip?: string },
 ): NewsletterData {
   const seq = activeSequenceFor(data, trigger)
   if (!seq || seq.emails.length === 0) return data
@@ -27,6 +28,7 @@ export function enroll(
     nextEmailIndex: 0,
     nextSendAt: now.toISOString(),
     status: 'active',
+    ...(consent ? { consentAt: consent.at, consentIp: consent.ip } : {}),
   }
   return { ...data, enrollments: [...data.enrollments, enrollment] }
 }
