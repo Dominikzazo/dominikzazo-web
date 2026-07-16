@@ -75,17 +75,20 @@ Ak si sa neprihlásil ty, len tento mail ignoruj — nič sa nestane.
 — Dominik`
 }
 
-export function renderConfirmHtml(url: string, firstName?: string): string {
+export function renderConfirmHtml(url: string, firstName?: string, avatarUrl?: string): string {
   const hi = firstName ? `Ahoj ${esc(firstName)},` : 'Ahoj,'
   const p = (t: string) =>
     `<p style="margin:0 0 15px;font:400 16px/1.65 Georgia,'Times New Roman',serif;color:#2b2a27;">${t}</p>`
+  const avatar = avatarUrl
+    ? `<img src="${esc(avatarUrl)}" alt="Dominik Žažo" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:10px;"/>`
+    : ''
   return `<!doctype html><html lang="sk"><body style="margin:0;padding:0;background:#ffffff;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;">
     <tr><td align="center" style="padding:36px 20px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;text-align:left;">
 
         <tr><td style="padding-bottom:20px;border-bottom:1px solid #eeeae2;">
-          <span style="font:400 16px/1.3 Georgia,serif;color:#1a1a1a;">Dominik Žažo</span>
+          ${avatar}<span style="font:400 16px/1.3 Georgia,serif;color:#1a1a1a;vertical-align:middle;">Dominik Žažo</span>
         </td></tr>
 
         <tr><td style="padding-top:28px;">

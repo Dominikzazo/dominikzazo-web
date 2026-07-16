@@ -36,12 +36,13 @@ export async function sendConfirmEmail(to: string, firstName?: string): Promise<
   const resend = resendClient()
   if (!resend || !to) return
   const url = confirmUrl(to, firstName)
+  const avatar = process.env.NEWSLETTER_AVATAR_URL || undefined
   await resend.emails.send({
     from: FROM,
     to,
     subject: CONFIRM_SUBJECT,
     text: renderConfirmText(url, firstName),
-    html: renderConfirmHtml(url, firstName),
+    html: renderConfirmHtml(url, firstName, avatar),
   })
 }
 
