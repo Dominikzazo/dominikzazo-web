@@ -512,6 +512,22 @@ export default function NewsletterAdmin() {
         <span style={{ color: COLORS.textMuted, fontSize: 18 }}>→</span>
       </a>
 
+      <a
+        href="/admin/newsletter/historia"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none',
+          background: COLORS.surface2, border: `0.5px solid ${COLORS.border}`, borderRadius: 14,
+          padding: '16px 18px', marginBottom: 18,
+        }}
+      >
+        <span style={{ fontSize: 24 }}>🗂️</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.textPrimary }}>História</div>
+          <div style={{ fontSize: 12, color: COLORS.textSecondary, marginTop: 2 }}>Všetko, čo si odoslal — týždenné čísla aj jednotlivé maily</div>
+        </div>
+        <span style={{ color: COLORS.textMuted, fontSize: 18 }}>→</span>
+      </a>
+
       {loadErr && <p style={{ margin: '0 0 14px', fontSize: 12, color: COLORS.textDanger }}>{loadErr}</p>}
       {saveState === 'saving' && <p style={{ margin: '0 0 14px', fontSize: 12, color: COLORS.textMuted }}>Ukladám…</p>}
       {saveState === 'saved' && <p style={{ margin: '0 0 14px', fontSize: 12, color: COLORS.textSuccess }}>✓ Uložené</p>}
