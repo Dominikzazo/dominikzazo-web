@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { getMember } from '@/lib/members/session'
+import { readData } from '@/lib/newsletter/store'
+import { classifyEmail } from '@/lib/newsletter/history'
 
 export const runtime = 'nodejs'
 
@@ -20,13 +22,20 @@ export async function GET() {
   const resend = new Resend(key)
 
   try {
-    const [emailsRes, broadcastsRes] = await Promise.all([
+    const [emailsRes, broadcastsRes, data] = await Promise.all([
       resend.emails.list(),
       resend.broadcasts.list(),
+      readData(),
     ])
 
     if (emailsRes.error) throw new Error(emailsRes.error.message)
     if (broadcastsRes.error) throw new Error(broadcastsRes.error.message)
+
+    // Kontext na určenie typu mailu (Resend v zozname tags nevracia).
+    const ctx = {
+      sequenceSubjects: data.sequences.flatMap((s) => s.emails.map((e) => e.subject)),
+      broadcastNames: (broadcastsRes.data?.data ?? []).map((b) => b.name || ''),
+    }
 
     const emails = (emailsRes.data?.data ?? [])
       .filter((e) => (e.from || '').includes(NEWSLETTER_DOMAIN))
@@ -36,6 +45,7 @@ export async function GET() {
         to: e.to?.[0] || '',
         createdAt: e.created_at,
         lastEvent: e.last_event || 'sent',
+        kind: classifyEmail(e.subject || '', ctx),
       }))
 
     const broadcasts = (broadcastsRes.data?.data ?? [])
