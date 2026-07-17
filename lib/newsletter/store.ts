@@ -1,60 +1,45 @@
-import { put, list, del } from '@vercel/blob'
+import { Redis } from '@upstash/redis'
 import type { NewsletterData } from './types'
 import { EMPTY_NEWSLETTER_DATA } from './types'
 
-// Verziovaný Blob store — rovnaká filozofia ako lib/cms/store.ts.
-// Zápis = nová cesta newsletter/data-<ts>.json (unikátna URL obchádza CDN cache).
+// Newsletter dáta žijú v Upstash Redise (KV napojený na dominikzazo.sk).
+// Predtým to bol Vercel Blob, ale ten na Hobby pláne narazil na strop
+// „advanced operations" (list pri každom čítaní) a store sa zablokoval.
+// Redis: jeden kľúč, O(1) get/set, žiadny operačný strop pri tomto objeme.
+const KEY = 'newsletter:data'
 
-const PREFIX = 'newsletter/data'
-const KEEP_VERSIONS = 5
-
-function token(): string | undefined {
-  return process.env.BLOB_READ_WRITE_TOKEN
+function client(): Redis | null {
+  const url = process.env.KV_REST_API_URL
+  const token = process.env.KV_REST_API_TOKEN
+  if (!url || !token) return null
+  return new Redis({ url, token })
 }
 
-type BlobMeta = { url: string; pathname: string; uploadedAt: string | Date }
-
-async function listVersions(t: string): Promise<BlobMeta[]> {
-  const { blobs } = await list({ prefix: PREFIX, token: t })
-  return (blobs as BlobMeta[]).sort((a, b) => +new Date(b.uploadedAt) - +new Date(a.uploadedAt))
+// Doplní chýbajúce polia (spätná kompatibilita so staršími záznamami bez events).
+export function normalizeData(raw: unknown): NewsletterData {
+  const d = (raw ?? {}) as Partial<NewsletterData>
+  return {
+    sequences: d.sequences ?? [],
+    enrollments: d.enrollments ?? [],
+    events: d.events ?? [],
+  }
 }
 
 export async function readData(): Promise<NewsletterData> {
-  const t = token()
-  if (!t) return EMPTY_NEWSLETTER_DATA
+  const redis = client()
+  if (!redis) return EMPTY_NEWSLETTER_DATA
   try {
-    const versions = await listVersions(t)
-    if (versions.length === 0) return EMPTY_NEWSLETTER_DATA
-    const res = await fetch(versions[0].url, {
-      headers: { Authorization: `Bearer ${t}` },
-      cache: 'no-store',
-    })
-    if (!res.ok) return EMPTY_NEWSLETTER_DATA
-    const data = (await res.json()) as Partial<NewsletterData>
-    return {
-      sequences: data.sequences ?? [],
-      enrollments: data.enrollments ?? [],
-      events: data.events ?? [],
-    }
-  } catch {
+    // @upstash/redis automaticky deserializuje JSON.
+    const raw = await redis.get<NewsletterData>(KEY)
+    return normalizeData(raw)
+  } catch (err) {
+    console.error('newsletter store read failed', err)
     return EMPTY_NEWSLETTER_DATA
   }
 }
 
 export async function writeData(data: NewsletterData): Promise<void> {
-  const t = token()
-  if (!t) throw new Error('BLOB_READ_WRITE_TOKEN chýba — úložisko nie je nakonfigurované.')
-  await put(`${PREFIX}-${Date.now()}.json`, JSON.stringify(data, null, 2), {
-    access: 'private',
-    token: t,
-    addRandomSuffix: true,
-    contentType: 'application/json',
-  })
-  try {
-    const versions = await listVersions(t)
-    const old = versions.slice(KEEP_VERSIONS).map((v) => v.url)
-    if (old.length > 0) await del(old, { token: t })
-  } catch {
-    // upratovanie nesmie zhodiť zápis
-  }
+  const redis = client()
+  if (!redis) throw new Error('KV nie je nakonfigurovaný — úložisko chýba.')
+  await redis.set(KEY, data)
 }
