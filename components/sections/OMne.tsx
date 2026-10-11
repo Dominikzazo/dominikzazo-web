@@ -1,19 +1,26 @@
 'use client'
 import { useState } from 'react'
 import type { SectionId } from '@/app/page'
-import type { MonthlyEdit } from '@/lib/cms/types'
+import type { MonthlyEdit, AboutData } from '@/lib/cms/types'
+import { DEFAULT_ABOUT } from '@/lib/cms/store'
 
-const FUN_FACTS = [
-  { e: '☕', t: 'Chemex adept',        d: 'Pomalá káva pre pomalý deň.' },
-  { e: '🧦', t: 'Parkside fanúšik',    d: 'Lidl merch je underrated.' },
-  { e: '🟠', t: 'Bitcoin konzultant',   d: 'Chráni tvoj čas pred infláciou.' },
-  { e: '🚄', t: 'Vlakový nájomník',     d: 'Považan, Bratislava, Považan...' },
-  { e: '🏐', t: 'Amatér volejbalista',  d: 'Profík na skórovanie. 😄' },
-  { e: '🌺', t: 'Havajské košele',      d: 'Gýčové? Áno. Obanovaním? Nikdy.' },
-  { e: '🚲', t: 'Bicykel',              d: 'Cesta, nie cieľ. Vždy.' },
-  { e: '🙏', t: 'ZMM a viera',          d: 'Mariánska mládež, každodenná.' },
-  { e: '🥤', t: 'Kofola závislosť',     d: '...závislosť je silné slovo. Alebo nie? :OO' },
-]
+function FormattedText({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return (
+            <strong key={i} style={{ color: '#1a1a1a', fontWeight: 500 }}>
+              {part.slice(2, -2)}
+            </strong>
+          )
+        }
+        return part
+      })}
+    </>
+  )
+}
 
 interface NavCardDef {
   label: string
@@ -59,7 +66,15 @@ function NavCard({ card, go }: { card: NavCardDef; go: (id: SectionId) => void }
   )
 }
 
-export default function OMne({ go, monthly }: { go: (id: SectionId) => void; monthly: MonthlyEdit }) {
+interface OMneProps {
+  go: (id: SectionId) => void
+  monthly: MonthlyEdit
+  about?: AboutData
+}
+
+export default function OMne({ go, monthly, about }: OMneProps) {
+  const a = about ?? DEFAULT_ABOUT
+
   return (
     <div className="page-enter page-pad" style={{ maxWidth: 740, margin: '0 auto' }}>
 
@@ -67,23 +82,23 @@ export default function OMne({ go, monthly }: { go: (id: SectionId) => void; mon
       <div className="omne-hero">
         <div>
           <h2 style={{ fontFamily: 'var(--font-lora), serif', fontSize: 52, fontWeight: 400, color: '#1a1a1a', marginBottom: 12, letterSpacing: '-0.02em' }}>
-            o mne.
+            {a.title}
           </h2>
           <p style={{ fontSize: 18, color: '#666', lineHeight: 1.85, marginBottom: 20, fontFamily: 'var(--font-lora), serif' }}>
-            Ahoj! Som Dominik, mám 22 rokov, som z Považana a snažím sa žiť pomaly v dobe, ktorá nás všetkých tlačí do rýchlosti. 🌱
+            <FormattedText text={a.bio1} />
           </p>
           <p style={{ fontSize: 17, color: '#666', lineHeight: 1.85, marginBottom: 20 }}>
-            Ráno začínam <strong style={{ color: '#1a1a1a', fontWeight: 500 }}>Chemexom</strong> ☕, potom žurnálujem a až potom sa pozriem na telefón. Pracujem v <strong style={{ color: '#1a1a1a', fontWeight: 500 }}>Amityage</strong> a popri tom pomáham ľuďom porozumieť <strong style={{ color: '#1a1a1a', fontWeight: 500 }}>Bitcoinu</strong>. 🟠
+            <FormattedText text={a.bio2} />
           </p>
           <p style={{ fontSize: 17, color: '#666', lineHeight: 1.85, marginBottom: 20 }}>
-            Fanúšik <strong style={{ color: '#1a1a1a', fontWeight: 500 }}>Mariánskej mládeže</strong> 🙏, amatérsky <strong style={{ color: '#1a1a1a', fontWeight: 500 }}>volejbalista</strong> 🏐 a profesionálny užívač <strong style={{ color: '#1a1a1a', fontWeight: 500 }}>skórovania</strong> 😄. Kofola je moja slabosť. Závislosť? Možno. :OO
+            <FormattedText text={a.bio3} />
           </p>
           <p style={{ fontSize: 17, color: '#666', lineHeight: 1.85, marginBottom: 0 }}>
-            Milujem <strong style={{ color: '#1a1a1a', fontWeight: 500 }}>gýčové havajské košele</strong> 🌺 a kto povie, že Traja pátrači nie sú top, nemáme čo riešiť.
+            <FormattedText text={a.bio4} />
           </p>
         </div>
         <img
-          src="/uploads/IMG_9642_2.JPG"
+          src={a.photoSrc}
           alt="Dominik"
           style={{ width: '100%', height: 280, objectFit: 'cover', objectPosition: 'center top', borderRadius: 20, display: 'block' }}
         />
@@ -91,11 +106,11 @@ export default function OMne({ go, monthly }: { go: (id: SectionId) => void; mon
 
       {/* Fun facts grid */}
       <div className="facts-grid">
-        {FUN_FACTS.map((f, i) => (
+        {a.facts.map((f, i) => (
           <div key={i} style={{ background: '#f7f7f5', borderRadius: 16, padding: '14px 16px' }}>
-            <div style={{ fontSize: 20, marginBottom: 7 }}>{f.e}</div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', marginBottom: 2 }}>{f.t}</div>
-            <div style={{ fontSize: 11, color: '#999', lineHeight: 1.5 }}>{f.d}</div>
+            <div style={{ fontSize: 20, marginBottom: 7 }}>{f.emoji}</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', marginBottom: 2 }}>{f.title}</div>
+            <div style={{ fontSize: 11, color: '#999', lineHeight: 1.5 }}>{f.desc}</div>
           </div>
         ))}
       </div>

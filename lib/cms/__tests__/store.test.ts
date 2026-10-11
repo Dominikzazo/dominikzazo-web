@@ -7,5 +7,7 @@ describe('cms store', () => {
     expect(data.books.length).toBeGreaterThan(0)
     expect(data.places.length).toBeGreaterThan(0)
     expect(data.monthly.heading).toBe(SEED.monthly.heading)
+    expect(data.homepage?.greeting).toBe(SEED.homepage?.greeting)
+    expect(data.about?.facts.length).toBeGreaterThan(0)
   })
 })

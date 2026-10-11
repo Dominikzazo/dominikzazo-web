@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
-import { readData, writeData } from './store'
-import type { Book, Place, MonthlyEdit } from './types'
+import { readData, writeData, DEFAULT_HOMEPAGE, DEFAULT_ABOUT } from './store'
+import type { Book, Place, MonthlyEdit, HomepageData, AboutData } from './types'
 
-// CRUD nad verejným obsahom (knihy, mapa, mesačný edit).
+// CRUD nad verejným obsahom (knihy, mapa, mesačný edit, homepage, o mne).
 // Číta sa z homepage (RSC), mutuje z /clenska/admin server actions.
 
 // ── Knihy ──────────────────────────────────────────────────
@@ -61,5 +61,29 @@ export async function getMonthly(): Promise<MonthlyEdit> {
 export async function updateMonthly(monthly: MonthlyEdit): Promise<void> {
   const d = await readData()
   d.monthly = monthly
+  await writeData(d)
+}
+
+// ── Homepage & O mne ───────────────────────────────────────
+
+export async function getHomepage(): Promise<HomepageData> {
+  const d = await readData()
+  return d.homepage ?? DEFAULT_HOMEPAGE
+}
+
+export async function updateHomepage(homepage: HomepageData): Promise<void> {
+  const d = await readData()
+  d.homepage = homepage
+  await writeData(d)
+}
+
+export async function getAbout(): Promise<AboutData> {
+  const d = await readData()
+  return d.about ?? DEFAULT_ABOUT
+}
+
+export async function updateAbout(about: AboutData): Promise<void> {
+  const d = await readData()
+  d.about = about
   await writeData(d)
 }

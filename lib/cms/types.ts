@@ -67,10 +67,43 @@ export interface PremiumItem {
   updatedAt: string
 }
 
+export interface HomepageData {
+  greeting: string
+  bio1: string
+  bio2: string
+  tagline: string
+  nowText: string
+  quoteText: string
+  quoteTags: string[]
+  photo1Src: string
+  photo1Label: string
+  photo2Src: string
+  photo2Label: string
+}
+
+export interface FunFact {
+  emoji: string
+  title: string
+  desc: string
+}
+
+export interface AboutData {
+  title: string
+  bio1: string
+  bio2: string
+  bio3: string
+  bio4: string
+  photoSrc: string
+  facts: FunFact[]
+}
+
 export interface CmsData {
   categories: Category[]
   items: PremiumItem[]
   books: Book[]
   places: Place[]
   monthly: MonthlyEdit
+  homepage?: HomepageData
+  about?: AboutData
 }
+

@@ -1,7 +1,7 @@
 import { put, list, del } from '@vercel/blob'
 import { Redis } from '@upstash/redis'
 import { neon } from '@neondatabase/serverless'
-import type { CmsData } from './types'
+import type { CmsData, HomepageData, AboutData } from './types'
 
 // Úložisko pre CMS:
 // 1. Prioritne Upstash Redis (KV_REST_API_URL / KV_REST_API_TOKEN) — už nakonfigurované na Verceli (rovnako ako newsletter).
@@ -64,7 +64,42 @@ export const SEED: CmsData = {
       updatedAt: new Date(0).toISOString(),
     },
   ],
+  homepage: {
+    greeting: 'Ahoj, ja som Dominik. 👋',
+    bio1: 'Mám 22 rokov, pijem **Chemex** ako keby od toho závisel život a moja najlepšia life advice? **Nauč sa byť ticho, aspoň chvíľku.** 🌿',
+    bio2: 'Baví ma **spomalenie**, každý deň **žurnálujem**, cestujem rýchlikom kedykoľvek sa dá 🚄 a tajne si myslím, že **Traja pátrači** sú najlepšia detektívka ever.',
+    tagline: 'Toto je môj **vedomý kút internetu**. Pomaly. Zámerne. Ľudsky.',
+    nowText: 'Teraz: druhá šálka z Chemexu a plánujem víkendový výlet rýchlikom. 🚄',
+    quoteText: 'Najlepšia rada na svete: nauč sa byť ticho, aspoň chvíľku. 🌿',
+    quoteTags: ['ticho'],
+    photo1Src: '/uploads/IMG_1978_3.JPG',
+    photo1Label: 'Chemex moment',
+    photo2Src: '/uploads/IMG_0326_3.JPG',
+    photo2Label: 'Niekde na svete',
+  },
+  about: {
+    title: 'o mne.',
+    bio1: 'Ahoj! Som Dominik, mám 22 rokov, som z Považana a snažím sa žiť pomaly v dobe, ktorá nás všetkých tlačí do rýchlosti. 🌱',
+    bio2: 'Ráno začínam **Chemexom** ☕, potom žurnálujem a až potom sa pozriem na telefón. Pracujem v **Amityage** a popri tom pomáham ľuďom porozumieť **Bitcoinu**. 🟠',
+    bio3: 'Fanúšik **Mariánskej mládeže** 🙏, amatérsky **volejbalista** 🏐 a profesionálny užívač **skórovania** 😄. Kofola je moja slabosť. Závislosť? Možno. :OO',
+    bio4: 'Milujem **gýčové havajské košele** 🌺 a kto povie, že Traja pátrači nie sú top, nemáme čo riešiť.',
+    photoSrc: '/uploads/IMG_9642_2.JPG',
+    facts: [
+      { emoji: '☕', title: 'Chemex adept', desc: 'Pomalá káva pre pomalý deň.' },
+      { emoji: '🧦', title: 'Parkside fanúšik', desc: 'Lidl merch je underrated.' },
+      { emoji: '🟠', title: 'Bitcoin konzultant', desc: 'Chráni tvoj čas pred infláciou.' },
+      { emoji: '🚄', title: 'Vlakový nájomník', desc: 'Považan, Bratislava, Považan...' },
+      { emoji: '🏐', title: 'Amatér volejbalista', desc: 'Profík na skórovanie. 😄' },
+      { emoji: '🌺', title: 'Havajské košele', desc: 'Gýčové? Áno. Obanovaním? Nikdy.' },
+      { emoji: '🚲', title: 'Bicykel', desc: 'Cesta, nie cieľ. Vždy.' },
+      { emoji: '🙏', title: 'ZMM a viera', desc: 'Mariánska mládež, každodenná.' },
+      { emoji: '🥤', title: 'Kofola závislosť', desc: '...závislosť je silné slovo. Alebo nie? :OO' },
+    ],
+  },
 }
+
+export const DEFAULT_HOMEPAGE: HomepageData = SEED.homepage!
+export const DEFAULT_ABOUT: AboutData = SEED.about!
 
 function redisClient(): Redis | null {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
@@ -98,6 +133,8 @@ function mergeWithSeed(data?: Partial<CmsData> | null): CmsData {
     books: data.books ?? SEED.books,
     places: data.places ?? SEED.places,
     monthly: data.monthly ?? SEED.monthly,
+    homepage: data.homepage ? { ...DEFAULT_HOMEPAGE, ...data.homepage } : DEFAULT_HOMEPAGE,
+    about: data.about ? { ...DEFAULT_ABOUT, ...data.about } : DEFAULT_ABOUT,
   }
 }
 

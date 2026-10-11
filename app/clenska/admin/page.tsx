@@ -52,6 +52,14 @@ export default async function AdminHome() {
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Link href="/clenska/admin/domov" className={TILE}>
+          <TileIcon>🏡</TileIcon>
+          <h2 className="mb-1 font-lora text-[18px] text-[#1a1a1a]">Domov & O mne</h2>
+          <p className="text-[13px] leading-[1.6] text-[#666]">
+            Hero intro · Bento „teraz" · Fakty o mne
+          </p>
+        </Link>
+
         <Link href="/clenska/admin/knihy" className={TILE}>
           <TileIcon>📚</TileIcon>
           <h2 className="mb-1 font-lora text-[18px] text-[#1a1a1a]">Knihy</h2>

@@ -12,15 +12,17 @@ import Cestovanie from '@/components/sections/Cestovanie'
 import Projekty from '@/components/sections/Projekty'
 import OMne from '@/components/sections/OMne'
 import type { SectionId } from '@/app/page'
-import type { Book, Place, MonthlyEdit } from '@/lib/cms/types'
+import type { Book, Place, MonthlyEdit, HomepageData, AboutData } from '@/lib/cms/types'
 
 interface HomeClientProps {
   books: Book[]
   places: Place[]
   monthly: MonthlyEdit
+  homepage?: HomepageData
+  about?: AboutData
 }
 
-export default function HomeClient({ books, places, monthly }: HomeClientProps) {
+export default function HomeClient({ books, places, monthly, homepage, about }: HomeClientProps) {
   const [active, setActive] = useState<SectionId>('home')
   const [transitioning, setTransitioning] = useState(false)
   const [transTarget, setTransTarget] = useState<SectionId | null>(null)
@@ -53,9 +55,9 @@ export default function HomeClient({ books, places, monthly }: HomeClientProps) 
       case 'projekty':
         return <Projekty go={go} />
       case 'o-mne':
-        return <OMne go={go} monthly={monthly} />
+        return <OMne go={go} monthly={monthly} about={about} />
       default:
-        return <Home go={go} />
+        return <Home go={go} homepage={homepage} books={books} />
     }
   }
 
