@@ -1,19 +1,18 @@
 import { put, list, del } from '@vercel/blob'
+import { Redis } from '@upstash/redis'
+import { neon } from '@neondatabase/serverless'
 import type { CmsData } from './types'
 
-// Tenká vrstva nad úložiskom (Vercel Blob, private store `kruh-cms`).
-// Celý CMS volá readData/writeData — ak raz vymeníme backend (Neon a pod.),
-// meníme len tento súbor. Rovnaká filozofia ako getMember() nad Clerk.
-//
-// DÔLEŽITÉ: zápisy sú VERZIOVANÉ (každý save = nová cesta cms/data-<ts>.json).
-// Prepisovanie tej istej cesty neslúži — Blob CDN drží starú verziu v cache
-// (overené: read → write → read vrátil STALE HIT). Unikátna URL = vždy čerstvé.
+// Úložisko pre CMS:
+// 1. Prioritne Upstash Redis (KV_REST_API_URL / KV_REST_API_TOKEN) — už nakonfigurované na Verceli (rovnako ako newsletter).
+//    O(1) get/set, nulové riziko vyčerpania Blob limitov.
+// 2. Sekundárne Postgres (DATABASE_URL / POSTGRES_URL) cez Neon.
+// 3. Spätný fallback na Vercel Blob a SEED.
 
-const PREFIX = 'cms/data'
-const KEEP_VERSIONS = 5 // mini-história posledných verzií
+const REDIS_KEY = 'cms:data'
+const BLOB_PREFIX = 'cms/data'
+const BLOB_KEEP_VERSIONS = 5
 
-// SEED = doterajší hardcoded obsah webu. Použije sa, kým v Blobe nie je uložená
-// prvá verzia (a ako fallback pri výpadku).
 export const SEED: CmsData = {
   books: [
     { id: 'b1', title: 'O pôvode prosperity', author: 'Rob Chovanculiak', status: 'práve čítam', year: 2025, note: 'Konečne ekonómia, ktorá mi dáva zmysel.', tags: ['ekonómia', 'filozofia'], order: 0 },
@@ -67,62 +66,136 @@ export const SEED: CmsData = {
   ],
 }
 
-function token(): string | undefined {
+function redisClient(): Redis | null {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) return null
+  return new Redis({ url, token })
+}
+
+function getDbUrl(): string | undefined {
+  return process.env.DATABASE_URL || process.env.POSTGRES_URL
+}
+
+function blobToken(): string | undefined {
   return process.env.BLOB_READ_WRITE_TOKEN
 }
 
 type BlobMeta = { url: string; pathname: string; uploadedAt: string | Date }
 
 async function listVersions(t: string): Promise<BlobMeta[]> {
-  const { blobs } = await list({ prefix: PREFIX, token: t })
+  const { blobs } = await list({ prefix: BLOB_PREFIX, token: t })
   return (blobs as BlobMeta[]).sort(
     (a, b) => +new Date(b.uploadedAt) - +new Date(a.uploadedAt),
   )
 }
 
-export async function readData(): Promise<CmsData> {
-  const t = token()
-  if (!t) return SEED
-  try {
-    const versions = await listVersions(t)
-    if (versions.length === 0) return SEED
-    const res = await fetch(versions[0].url, {
-      headers: { Authorization: `Bearer ${t}` },
-      cache: 'no-store',
-    })
-    if (!res.ok) return SEED
-    const data = (await res.json()) as Partial<CmsData>
-    // Chýbajúce kľúče (staršia verzia dát) doplň zo SEEDu
-    return {
-      categories: data.categories ?? SEED.categories,
-      items: data.items ?? SEED.items,
-      books: data.books ?? SEED.books,
-      places: data.places ?? SEED.places,
-      monthly: data.monthly ?? SEED.monthly,
-    }
-  } catch {
-    return SEED
+function mergeWithSeed(data?: Partial<CmsData> | null): CmsData {
+  if (!data) return SEED
+  return {
+    categories: data.categories ?? SEED.categories,
+    items: data.items ?? SEED.items,
+    books: data.books ?? SEED.books,
+    places: data.places ?? SEED.places,
+    monthly: data.monthly ?? SEED.monthly,
   }
 }
 
-export async function writeData(data: CmsData): Promise<void> {
-  const t = token()
-  if (!t) throw new Error('BLOB_READ_WRITE_TOKEN chýba — úložisko nie je nakonfigurované.')
-
-  // Nová verzia = nová cesta (unikátna URL obíde CDN cache starej verzie)
-  await put(`${PREFIX}-${Date.now()}.json`, JSON.stringify(data, null, 2), {
-    access: 'private',
-    token: t,
-    addRandomSuffix: true,
-    contentType: 'application/json',
-  })
-
-  // Best-effort upratanie starých verzií (necháme mini-históriu)
-  try {
-    const versions = await listVersions(t)
-    const old = versions.slice(KEEP_VERSIONS).map((v) => v.url)
-    if (old.length > 0) await del(old, { token: t })
-  } catch {
-    // upratovanie nesmie zhodiť zápis
+export async function readData(): Promise<CmsData> {
+  // 1. Skús Upstash Redis (KV) — rovnaký store ako používa newsletter
+  const redis = redisClient()
+  if (redis) {
+    try {
+      const raw = await redis.get<Partial<CmsData>>(REDIS_KEY)
+      if (raw) return mergeWithSeed(raw)
+    } catch (err) {
+      console.error('CMS redis read failed:', err)
+    }
   }
+
+  // 2. Skús Postgres (Neon)
+  const dbUrl = getDbUrl()
+  if (dbUrl) {
+    try {
+      const sql = neon(dbUrl)
+      const rows = (await sql`SELECT data FROM cms_store WHERE id = 'main' LIMIT 1`) as { data: any }[]
+      if (rows && rows.length > 0 && rows[0].data) {
+        return mergeWithSeed(rows[0].data)
+      }
+    } catch (err) {
+      console.error('CMS postgres read failed:', err)
+    }
+  }
+
+  // 3. Fallback na Vercel Blob (ak existuje)
+  const t = blobToken()
+  if (t) {
+    try {
+      const versions = await listVersions(t)
+      if (versions.length > 0) {
+        const res = await fetch(versions[0].url, {
+          headers: { Authorization: `Bearer ${t}` },
+          cache: 'no-store',
+        })
+        if (res.ok) {
+          const data = (await res.json()) as Partial<CmsData>
+          return mergeWithSeed(data)
+        }
+      }
+    } catch {
+      // Ignoruj Blob limity a vráť SEED
+    }
+  }
+
+  return SEED
+}
+
+export async function writeData(data: CmsData): Promise<void> {
+  // 1. Prioritne zapíš do Upstash Redis (KV)
+  const redis = redisClient()
+  if (redis) {
+    await redis.set(REDIS_KEY, data)
+    return
+  }
+
+  // 2. Sekundárne do Postgres (Neon)
+  const dbUrl = getDbUrl()
+  if (dbUrl) {
+    const sql = neon(dbUrl)
+    await sql`
+      CREATE TABLE IF NOT EXISTS cms_store (
+        id TEXT PRIMARY KEY,
+        data JSONB NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `
+    await sql`
+      INSERT INTO cms_store (id, data, updated_at)
+      VALUES ('main', ${JSON.stringify(data)}, NOW())
+      ON CONFLICT (id) DO UPDATE
+      SET data = EXCLUDED.data, updated_at = NOW()
+    `
+    return
+  }
+
+  // 3. Fallback do Vercel Blob
+  const t = blobToken()
+  if (t) {
+    await put(`${BLOB_PREFIX}-${Date.now()}.json`, JSON.stringify(data, null, 2), {
+      access: 'private',
+      token: t,
+      addRandomSuffix: true,
+      contentType: 'application/json',
+    })
+    try {
+      const versions = await listVersions(t)
+      const old = versions.slice(BLOB_KEEP_VERSIONS).map((v) => v.url)
+      if (old.length > 0) await del(old, { token: t })
+    } catch {
+      // upratovanie nesmie zhodiť zápis
+    }
+    return
+  }
+
+  throw new Error('Žiadne úložisko nie je nakonfigurované (chýba KV_REST_API_URL, DATABASE_URL ani BLOB token).')
 }
